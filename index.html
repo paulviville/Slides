@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<title>Slides</title>
+		<link rel="stylesheet" href="./multiCol.css">
+		<link rel="stylesheet" href="./Reveal/reveal.css">
+		<link rel="stylesheet" href="./Reveal/theme/solarized.css">
+	</head>
+
+	<body>
+		
+		<div class="reveal">
+			<div class="slides" id="slides">
+				<section id="Title"> 
+					<h3 class='r-fit-text'>Hexahedral  Mesh  Generation</h3>
+					<h3 class='r-fit-text'>For Tubular Shapes Using Skeletons and Connection Surfaces</h3>
+					<!-- <div style="display:flex; justify-content:space-evenly; font-size:0.5em; padding-top: 4.2em;"> -->
+					<div class="r-hstack" style="font-size: 0.5em; padding-top:2.7em;">
+						<div style="padding-right:10%" >P. Viville</div>
+						<div style="padding-right:10%">P. Kraemer</div>
+						<div style="">D. Bechmann</div>
+					</div>
+					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
+						<div class="r-hstack">
+							<img src="Images/Title/IGG.png" height="40px" style="padding-right: 5%;">
+							<img src="Images/Title/ICube.png" height="40px" style="padding-right: 5%;">
+							<img src="Images/Title/CNRS.png" height="40px" style="padding-right: 5%;">
+							<img src="Images/Title/unistra.png" height="40px" >
+						</div>
+				</section>
+				<section id="Goals"> 
+					Overview
+
+					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
+						<div class="r-hstack"> 
+							<!-- <img src="Images/Title/ICube.png" width="200px" height="200px" style="padding-right: 5%;"> -->
+							<canvas id="myCanvas0" width="300" height="300"></canvas>
+							<img src="Images/Title/arrow.png" height="100px" style="padding-right: 5%; padding-left: 5%;">
+							<canvas id="myCanvas1" width="300" height="300"></canvas>
+							<!-- <img src="Images/Title/unistra.png" width="200px" height="200px" > -->
+						</div>
+				</section>
+			</div>
+		</div>
+
+		<script type="module">
+			import Reveal from './Reveal/reveal.esm.js'
+			import Slide from './Slide.js'
+			import Renderer from './CMapJS/Renderer.js';
+			import * as THREE from './CMapJS/three.module.js';
+			import {OrbitControls} from './CMapJS/OrbitsControls.js';
+			import {load_cmap2} from './CMapJS/IO/Surface_Formats/CMap2_IO.js' 
+			import {load_cmap3} from './CMapJS/IO/Volumes_Formats/CMap3_IO.js' 
+			import {tetrahedron_off, icosahedron_off, cube_off, octahedron_off, cactus_off, fertility_off, metatron_off} from './off_files.js';
+			import {test1_mesh, fertility, dinopet, santa, ortho3, cactus, test0_mesh, metatron} from './mesh_files.js';
+
+			Reveal.initialize({touch: false}).then(() => {
+				let background = new THREE.Color(0xfdf6e3);
+				let mesh_face_color = new THREE.Color(0x555555);
+				let mesh_edge_color = new THREE.Color(0x333333);
+
+				let mesh_face_material = new THREE.MeshLambertMaterial({
+					color: mesh_face_color,
+					side: THREE.FrontSide,
+					transparent: true,
+					opacity: 0.5
+				});
+
+				let mesh_edge_material = new THREE.LineBasicMaterial({
+					color: mesh_edge_color,
+					linewidth: 2,
+					polygonOffset: true,
+					polygonOffsetFactor: -0.5
+				});
+
+
+				let slide_overview = new Slide(
+					function()
+					{
+						this.scene = new THREE.Scene()
+						this.scene.background = background;
+						this.scene.add(new THREE.AmbientLight(0xFFFFFF, 0.8));
+						let pointLight0 = new THREE.PointLight(0xFFFFFF, 0.8);
+						pointLight0.position.set(10,8,5);
+						this.scene.add(pointLight0);
+						
+						this.scene2 = new THREE.Scene()
+						this.scene2.background = background;
+						this.scene2.add(new THREE.AmbientLight(0xFFFFFF, 0.8));
+						let pointLight02 = new THREE.PointLight(0xFFFFFF, 0.8);
+						pointLight02.position.set(10,8,5);
+						this.scene2.add(pointLight02);
+
+						this.renderer0 = new THREE.WebGLRenderer({canvas: document.getElementById("myCanvas0")});	
+						this.renderer1 = new THREE.WebGLRenderer({canvas: document.getElementById("myCanvas1")});	
+						// this.renderer.setSize( width *0.5, height *0.5);
+						// domElement.appendChild( this.renderer.domElement );
+
+						this.camera = new THREE.PerspectiveCamera(75, 200 / 200, 0.1, 1000.0);
+						this.camera.position.set(0, 0, 2);
+
+						let orbit_controls = new OrbitControls(this.camera, this.renderer0.domElement);
+						let orbit_controls1 = new OrbitControls(this.camera, this.renderer1.domElement);
+						orbit_controls.enablePan = false;
+						orbit_controls.update();
+
+						this.cmap2 = load_cmap2('off', cactus_off);
+						this.map_renderer = new Renderer(this.cmap2);
+						this.map_renderer.edges.create({material: mesh_edge_material}).add(this.scene);
+						// this.map_renderer.faces.create({material: mesh_face_material}).add(this.scene);
+
+						// this.cmap22 = load_cmap2('off', icosahedron_off);
+						// this.map_renderer2 = new Renderer(this.cmap22);
+						// this.map_renderer2.edges.create({material: mesh_edge_material}).add(this.scene2);
+						// this.map_renderer2.faces.create({material: mesh_face_material}).add(this.scene2);
+
+						this.cmap3 = load_cmap3('mesh', cactus);
+						this.map_renderer3 = new Renderer(this.cmap3);
+						this.map_renderer3.edges.create({material: mesh_edge_material}).add(this.scene2);
+						this.map_renderer3.faces.create({material: mesh_face_material}).add(this.scene2);
+
+						this.running = true;
+						this.loop = function(){
+							if(this.running){
+								this.renderer0.render(this.scene, this.camera);
+								this.renderer1.render(this.scene2, this.camera);
+								// this.renderer2.render(this.scene, this.camera);
+								requestAnimationFrame(this.loop.bind(this));
+							}
+						}
+						requestAnimationFrame(this.loop.bind(this));
+					}
+				);
+				slide_overview.init()
+			});
+			
+		</script>
+	</body>
+
+</html>
