@@ -11,6 +11,4 @@ export default function Slide(init_func){
 	this.init = init_func.bind(this);
 	
 	this.running = false;
-
-
 }
