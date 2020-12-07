@@ -111,9 +111,9 @@
 						<div class="r-hstack">
 							<div style="padding-right:2%">  
 								<div class="r-vstack">  
-									<canvas  id="Process2_result" width="400" height="400"></canvas>
+									<canvas  id="Process2_result" width="300" height="450"></canvas>
 									<div>
-										<p style="font-size: 30px;">Result<br>Mesh</p>
+										<p style="font-size: 30px;">Optimized<br>Mesh</p>
 									</div>
 								</div>
 							</div>
@@ -131,9 +131,6 @@
 			import {load_graph} from './CMapJS/IO/Graph_Formats/Graph_IO.js' 
 			import {load_cmap2, export_cmap2} from './CMapJS/IO/Surface_Formats/CMap2_IO.js' 
 			import {load_cmap3} from './CMapJS/IO/Volumes_Formats/CMap3_IO.js' 
-			// import {vessels_off, tetrahedron_off, icosahedron_off, cube_off, octahedron_off, cactus_off, cactus_scaffold_off, fertility_off, fertility_scaffold_off, metatron_off} from './off_files.js';
-			// import {test1_mesh, fertility_mesh, dinopet, santa, ortho3, cactus, test0_mesh, metatron} from './mesh_files.js';
-			// import {cactus_cg, fertility_simplified_cg, fertility_cg} from './cg_files.js';
 			import {BoundingBox} from './CMapJS/Utils/BoundingBox.js';
 			import {slide_overview, slide_process_0, slide_process_1, slide_process_2} from './slides.js';
 
@@ -152,7 +149,11 @@
 				if(active_slide) active_slide.open();
 			});
 
-			Reveal.initialize({touch: false, slideNumber: 'c/t'}).then(() => {
+			Reveal.initialize({
+				touch: false, 
+				slideNumber: 'c/t',
+				transition: 'none'
+			}).then(() => {
 				
 				slides["Overview"].init(
 					document.getElementById("overview_input"),
@@ -174,6 +175,8 @@
 				slides["Process_2"].init(
 					document.getElementById("Process2_result")
 				);
+
+				
 			});
 			
 		</script>
