@@ -29,23 +29,25 @@
 							<img src="Images/Title/unistra.png" height="40px" >
 						</div>
 				</section>
+
 				<section id="Overview"> 
 					Overview
 
 					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
 						<div class="r-hstack"> 
 							<!-- <img src="Images/Title/ICube.png" width="200px" height="200px" style="padding-right: 5%;"> -->
-							<canvas id="myCanvas0" width="300" height="400"></canvas>
-							<img src="Images/Utils/arrow.png" height="100px" style="padding-right: 3%; padding-left: 3%;">
-							<canvas id="myCanvas1" width="300" height="400"></canvas>
+							<canvas id="overview_input" width="350" height="400"></canvas>
+							<img src="Images/Utils/arrow.png" height="80px" style="padding-right: 1%; padding-left: 1%;">
+							<canvas id="overview_output" width="350" height="400"></canvas>
 							<!-- <img src="Images/Title/unistra.png" width="200px" height="200px" > -->
 						</div>
 				</section>
+
 				<section id="Process_0"> 
 					Process
 					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
 						<div class="r-hstack">
-							<div class="fragment" style="padding-right:2%">  
+							<div style="padding-right:2%">  
 								<div class="r-vstack">  
 									<canvas  id="Process0_surface" width="220" height="400"></canvas>
 									<div>
@@ -71,11 +73,12 @@
 							</div>
 						</div>
 				</section>
+
 				<section id="Process_1"> 
 					Process
 					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
 						<div class="r-hstack">
-							<div class="fragment" style="padding-right:2%">  
+							<div style="padding-right:2%">  
 								<div class="r-vstack">  
 									<canvas  id="Process1_scaffold" width="220" height="400"></canvas>
 									<div>
@@ -101,6 +104,21 @@
 							</div>
 						</div>
 				</section>
+
+				<section id="Process_2"> 
+					Process
+					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
+						<div class="r-hstack">
+							<div style="padding-right:2%">  
+								<div class="r-vstack">  
+									<canvas  id="Process2_result" width="400" height="400"></canvas>
+									<div>
+										<p style="font-size: 30px;">Result<br>Mesh</p>
+									</div>
+								</div>
+							</div>
+						</div>
+				</section>
 			</div>
 		</div>
 
@@ -113,151 +131,49 @@
 			import {load_graph} from './CMapJS/IO/Graph_Formats/Graph_IO.js' 
 			import {load_cmap2, export_cmap2} from './CMapJS/IO/Surface_Formats/CMap2_IO.js' 
 			import {load_cmap3} from './CMapJS/IO/Volumes_Formats/CMap3_IO.js' 
-			import {tetrahedron_off, icosahedron_off, cube_off, octahedron_off, cactus_off, cactus_scaffold_off, fertility_off, metatron_off} from './off_files.js';
-			import {test1_mesh, fertility, dinopet, santa, ortho3, cactus, test0_mesh, metatron} from './mesh_files.js';
-			import {cactus_simplified_cg} from './cg_files.js';
+			// import {vessels_off, tetrahedron_off, icosahedron_off, cube_off, octahedron_off, cactus_off, cactus_scaffold_off, fertility_off, fertility_scaffold_off, metatron_off} from './off_files.js';
+			// import {test1_mesh, fertility_mesh, dinopet, santa, ortho3, cactus, test0_mesh, metatron} from './mesh_files.js';
+			// import {cactus_cg, fertility_simplified_cg, fertility_cg} from './cg_files.js';
 			import {BoundingBox} from './CMapJS/Utils/BoundingBox.js';
-			import {slide_process_0, slide_process_1} from './slides.js';
+			import {slide_overview, slide_process_0, slide_process_1, slide_process_2} from './slides.js';
+
+			let slides = new Array();
+			slides["Overview"] = slide_overview;
+			slides["Process_0"] = slide_process_0;
+			slides["Process_1"] = slide_process_1;
+			slides["Process_2"] = slide_process_2;
+			// slides[] = ;
+
+			let active_slide;
+			Reveal.addEventListener('slidechanged', function(event) {
+				if(active_slide) active_slide.close();
+				var sectionID = Reveal.getCurrentSlide().id;
+				active_slide = slides[sectionID]
+				if(active_slide) active_slide.open();
+			});
 
 			Reveal.initialize({touch: false, slideNumber: 'c/t'}).then(() => {
-				let background = new THREE.Color(0xfdf6e3);
-				let mesh_face_color = new THREE.Color(0x555555);
-				let mesh_edge_color = new THREE.Color(0x333333);
+				
+				slides["Overview"].init(
+					document.getElementById("overview_input"),
+				 	document.getElementById("overview_output")
+				);
 
-				let mesh_face_material = new THREE.MeshLambertMaterial({
-					color: mesh_face_color,
-					side: THREE.FrontSide,
-					transparent: true,
-					opacity: 0.5
-				});
-
-				let mesh_edge_material = new THREE.LineBasicMaterial({
-					color: mesh_edge_color,
-					linewidth: 2,
-					polygonOffset: true,
-					polygonOffsetFactor: -0.5
-				});
-
-				slide_process_0.init(
+				slides["Process_0"].init(
 					document.getElementById("Process0_surface"),
 				 	document.getElementById("Process0_skel"),
 					document.getElementById("Process0_skel_simple")
 				);
-				slide_process_0.open();
 
-				slide_process_1.init(
+				slides["Process_1"].init(
 					document.getElementById("Process1_scaffold"),
 					document.getElementById("Process1_initial_mesh"),
 					document.getElementById("Process1_surface_fit_mesh")
 				);
-				slide_process_1.open();
 
-				let slide_overview = new Slide(
-					function()
-					{
-
-						
-						// this.scene2 = new THREE.Scene()
-						// this.scene2.add(new THREE.AmbientLight(0xFFFFFF, 0.8));
-						// let pointLight02 = new THREE.PointLight(0xFFFFFF, 0.8);
-						// pointLight02.position.set(10,8,5);
-						// this.scene2.add(pointLight02);
-
-						this.renderer0 = new THREE.WebGLRenderer({alpha: true, canvas: document.getElementById("myCanvas0"), antialias: true});	
-						this.renderer1 = new THREE.WebGLRenderer({alpha: true,canvas: document.getElementById("myCanvas1"), antialias: true});	
-						console.log(this.renderer0.domElement)
-						this.camera = new THREE.PerspectiveCamera(75, this.renderer0.domElement.width / this.renderer0.domElement.height, 0.1, 1000.0);
-						this.camera.position.set(0, 0, 1);
-
-						this.scene = new THREE.Scene()
-						// this.scene.background = background;
-						let ambiant = new THREE.AmbientLight(0xFFFFFF, 0.8);
-						ambiant.layers.enable(1);
-						this.scene.add(ambiant);
-						let pointLight0 = new THREE.PointLight(0xFFFFFF, 0.8);
-						pointLight0.layers.enable(1);
-						pointLight0.position.set(10,8,5);
-						this.scene.add(pointLight0);
-
-						let orbit_controls = new OrbitControls(this.camera, this.renderer0.domElement);
-						let orbit_controls1 = new OrbitControls(this.camera, this.renderer1.domElement);
-						orbit_controls.enablePan = false;
-						orbit_controls.update();
-
-						this.cmap2 = load_cmap2('off', cactus_off);
-						this.map_renderer = new Renderer(this.cmap2);
-						// this.map_renderer.edges.create({material: mesh_edge_material}).add(this.scene);
-						this.map_renderer.faces.create({material: mesh_face_material}).add(this.scene);
-
-						this.scaffold = load_cmap2('off', cactus_scaffold_off);
-						this.scaffold_renderer = new Renderer(this.scaffold);
-						// this.map_renderer.edges.create({material: mesh_edge_material}).add(this.scene);
-						this.scaffold_renderer.edges.create({color: 0xFF0000}).add(this.scene);
-
-						this.graph = load_graph('cg', cactus_simplified_cg);
-						this.graph_renderer = new Renderer(this.graph);
-						this.graph_renderer.edges.create({material: mesh_edge_material}).add(this.scene);
-						
-
-						let bb = BoundingBox(this.cmap2.get_attribute(this.cmap2.vertex, "position"))
-						console.log(bb);
-
-						let axis_x = new THREE.Vector3(1, 0, 0);
-						let axis_y = new THREE.Vector3(0, 1, 0);
-						let pos = this.scaffold.get_attribute(this.scaffold.vertex, "position");
-						this.scaffold.foreach(this.cmap2.vertex, vd => {
-							pos[this.scaffold.cell(this.cmap2.vertex, vd)].sub(bb.mid);
-							pos[this.scaffold.cell(this.cmap2.vertex, vd)].applyAxisAngle(axis_x,-Math.PI/2);
-							pos[this.scaffold.cell(this.cmap2.vertex, vd)].applyAxisAngle(axis_y,-Math.PI/2);
-						});	
-						pos = this.cmap2.get_attribute(this.scaffold.vertex, "position");
-						this.cmap2.foreach(this.cmap2.vertex, vd => {
-							pos[this.cmap2.cell(this.cmap2.vertex, vd)].sub(bb.mid);
-							pos[this.cmap2.cell(this.cmap2.vertex, vd)].applyAxisAngle(axis_x,-Math.PI/2);
-							pos[this.cmap2.cell(this.cmap2.vertex, vd)].applyAxisAngle(axis_y,-Math.PI/2);
-						});
-						pos = this.graph.get_attribute(this.graph.vertex, "position");
-						this.graph.foreach(this.graph.vertex, vd => {
-							pos[this.graph.cell(this.graph.vertex, vd)].sub(bb.mid);
-							pos[this.graph.cell(this.graph.vertex, vd)].applyAxisAngle(axis_x,-Math.PI/2);
-							pos[this.graph.cell(this.graph.vertex, vd)].applyAxisAngle(axis_y,-Math.PI/2);
-						});						
-						// console.log(export_cmap2(this.scaffold, "off"));
-						// this.map_renderer.faces.mesh.position.sub(bb.mid)
-						// this.map_renderer.faces.mesh.rotation.x += Math.PI / 2
-
-						// this.camera.target.set(bb.mid);
-						// orbit_controls.target.copy(bb.mid);
-						// orbit_controls1.target.copy(bb.mid);
-						// orbit_controls.update();
-						this.cmap3 = load_cmap3('mesh', cactus);
-						pos = this.cmap3.get_attribute(this.cmap3.vertex, "position");
-						this.cmap3.foreach(this.cmap3.vertex, vd => {
-							pos[this.cmap3.cell(this.cmap3.vertex, vd)].sub(bb.mid);
-							pos[this.cmap3.cell(this.cmap3.vertex, vd)].applyAxisAngle(axis_x,-Math.PI/2);
-							pos[this.cmap3.cell(this.cmap3.vertex, vd)].applyAxisAngle(axis_y,-Math.PI/2);
-						});		
-						this.map_renderer3 = new Renderer(this.cmap3);
-						this.map_renderer3.edges.create({layer: 1, material: mesh_edge_material}).add(this.scene);
-						this.map_renderer3.faces.create({layer: 1, material: mesh_face_material}).add(this.scene);
-						this.camera.layers.disableAll();
-						this.running = true;
-						this.loop = function(){
-							if(this.running){
-
-								this.camera.layers.enable(0);
-								this.renderer0.render(this.scene, this.camera);
-								this.camera.layers.disable(0);
-								this.camera.layers.enable(1);
-								this.renderer1.render(this.scene, this.camera);
-								this.camera.layers.disable(1);// this.renderer2.render(this.scene, this.camera);
-								requestAnimationFrame(this.loop.bind(this));
-							}
-						}
-						requestAnimationFrame(this.loop.bind(this));
-					}
+				slides["Process_2"].init(
+					document.getElementById("Process2_result")
 				);
-				slide_overview.init()
 			});
 			
 		</script>
