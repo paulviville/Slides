@@ -1,7 +1,9 @@
 import Slide from './Slide.js'
-import Renderer from './CMapJS/Renderer.js';
-import * as THREE from './CMapJS/three.module.js';
-import {OrbitControls} from './CMapJS/OrbitsControls.js';
+import Renderer from './CMapJS/Rendering/Renderer.js';
+import Renderer_Spherical from './CMapJS/Rendering/Renderer_Spherical.js';
+
+import * as THREE from './CMapJS/Dependencies/three.module.js';
+import {OrbitControls} from './CMapJS/Dependencies/OrbitsControls.js';
 import {load_graph} from './CMapJS/IO/Graph_Formats/Graph_IO.js' 
 import {load_cmap2, export_cmap2} from './CMapJS/IO/Surface_Formats/CMap2_IO.js' 
 import {load_cmap3} from './CMapJS/IO/Volumes_Formats/CMap3_IO.js' 
@@ -10,8 +12,9 @@ import {cactus_simplified_cg, cactus_cg, fertility_simplified_cg, fertility_cg} 
 import {fertility_mesh} from './Files/fertility_files.js';
 import {cactus0_mesh, cactus1_mesh, cactus_mesh} from './Files/cactus_files.js';
 import {BoundingBox} from './CMapJS/Utils/BoundingBox.js';
-import compute_scaled_jacobian from './CMapJS/Modeling/Quality/Scaled_Jacobians.js'
-import {Clock} from './CMapJS/three.module.js'
+import compute_scaled_jacobian from './CMapJS/Modeling/Quality/Scaled_Jacobians.js';
+import {Clock} from './CMapJS/Dependencies/three.module.js';
+import * as SP from './Files/sphere_partition_files.js';
 
 let background = new THREE.Color(0xfdf6e3);
 let mesh_face_color = new THREE.Color(0x60c3f4);
@@ -52,10 +55,15 @@ let fertility_simplified_skel = load_graph('cg', fertility_simplified_cg);
 let fertility_scaffold = load_cmap2('off', fertility_scaffold_off);
 let fertility_vol = load_cmap3('mesh', fertility_mesh);
 
+let sphere_graph = load_graph('cg', SP.branches_cg);
+let sphere_raw = load_cmap2("off", SP.delaunay_raw_off);
+let sphere_remesh = load_cmap2("off", SP.delaunay_remeshed_off);
+let sphere_dual = load_cmap2("off", SP.dual_off);
+
 cactus_opt_mesh.set_embeddings(cactus_opt_mesh.vertex2);
 cactus_opt_mesh.set_embeddings(cactus_opt_mesh.volume);
 let scaled_jacobian = compute_scaled_jacobian(cactus_opt_mesh);
-
+console.log(fertility_simplified_skel)
 // console.log(scaled_jacobian)
 let sj, avg_sj = 0, min_sj = Infinity, max_sj = -Infinity, nb = 0;
 cactus_opt_mesh.foreach(cactus_opt_mesh.volume, wd => {
@@ -442,6 +450,119 @@ export let slide_process_2 = new Slide(
 				this.camera.layers.disable(1);
 				this.camera.layers.enable(0);
 				this.renderer_quality.render(this.scene, this.camera);
+				requestAnimationFrame(this.loop.bind(this));
+			}
+		}
+
+	}
+);
+
+export let slide_sphere_partition = new Slide(
+	function(DOM_points, DOM_raw, DOM_remesh, DOM_dual, DOM_result){
+		this.camera = new THREE.PerspectiveCamera(75, DOM_result.width / DOM_result.height, 0.1, 1000.0);
+		this.camera.position.set(0, 0, 2);
+
+		this.scene = new THREE.Scene();
+		let ambiantLight = new THREE.AmbientLight(0xFFFFFF, ambiant_light_int);
+		let pointLight = new THREE.PointLight(0xFFFFFF, point_light_int);
+		pointLight.position.set(10,8,5);
+		// ambiantLight.layers.enable(1);
+		// pointLight.layers.enable(1);
+		this.scene.add(ambiantLight);
+		this.scene.add(pointLight);
+
+		this.group = new THREE.Group;
+		this.scene.add(this.group);
+
+		let sphere_mat = new THREE.MeshLambertMaterial({color: 0xEEEEEE, transparent: true, opacity: 0.50});
+		let sphere_geom = new THREE.SphereGeometry( 0.995, 64, 64 );
+		let sphere =  new THREE.Mesh(sphere_geom, sphere_mat);
+		this.group.add(sphere);
+
+		let point_geom = new THREE.SphereGeometry( 0.035, 16, 16 );
+		let point_mat = new THREE.MeshLambertMaterial({color: 0xFF0000});
+		let points = new THREE.Group;
+		this.group.add(points);
+		let points_pos = sphere_graph.get_attribute(sphere_graph.vertex, "position");
+		sphere_graph.foreach(sphere_graph.vertex, vd => {
+			let point = new THREE.Mesh(point_geom, point_mat);
+			point.position.copy(points_pos[sphere_graph.cell(sphere_graph.vertex, vd)]);
+			points.add(point);
+		})
+
+		let branching_point_renderer = new Renderer(sphere_graph);
+		branching_point_renderer.vertices.create({color: 0x00FF00}).add(this.group);
+		branching_point_renderer.edges.create({material: mesh_edge_material}).add(this.group);
+
+		let raw_delaunay_renderer = new Renderer_Spherical(sphere_raw);
+		raw_delaunay_renderer.geodesics.create({layer: 1, color: 0x0011FF}).add(this.group);
+
+		let remeshed_delaunay_renderer = new Renderer_Spherical(sphere_remesh);
+		remeshed_delaunay_renderer.geodesics.create({layer: 2, color: 0x11DD44}).add(this.group);
+
+		let dual_renderer = new Renderer_Spherical(sphere_dual);
+		dual_renderer.geodesics.create({layer: 3, color: 0xFF2222}).add(this.group);
+
+
+		this.renderer_points = new THREE.WebGLRenderer({
+			canvas: DOM_points,
+			antialias: true,
+			alpha: true
+		});
+		let orbit_controls0  = new OrbitControls(this.camera, this.renderer_points.domElement);
+		
+		this.renderer_raw = new THREE.WebGLRenderer({
+			canvas: DOM_raw,
+			antialias: true,
+			alpha: true
+		});
+		let orbit_controls1  = new OrbitControls(this.camera, this.renderer_raw.domElement);
+		this.renderer_remesh = new THREE.WebGLRenderer({
+			canvas: DOM_remesh,
+			antialias: true,
+			alpha: true
+		});
+		let orbit_controls2  = new OrbitControls(this.camera, this.renderer_remesh.domElement);
+		this.renderer_dual = new THREE.WebGLRenderer({
+			canvas: DOM_dual,
+			antialias: true,
+			alpha: true
+		});
+		let orbit_controls3  = new OrbitControls(this.camera, this.renderer_dual.domElement);
+		this.renderer_result = new THREE.WebGLRenderer({
+			canvas: DOM_result,
+			antialias: true,
+			alpha: true
+		});
+		let orbit_controls4  = new OrbitControls(this.camera, this.renderer_result.domElement);
+
+
+		const axis = new THREE.Vector3(0, 1, 0);
+		let v = new THREE.Vector3;
+		this.clock = new Clock(true);
+		this.time = 0;
+		this.loop = function(){
+			if(this.running){
+				this.time += this.clock.getDelta();
+				this.group.setRotationFromAxisAngle(axis, Math.PI / 60 * this.time);
+
+				this.camera.layers.enable(0);
+				this.renderer_points.render(this.scene, this.camera);
+
+				this.camera.layers.enable(1);
+				this.renderer_raw.render(this.scene, this.camera);
+				this.camera.layers.disable(1);
+
+				this.camera.layers.enable(2);
+				this.renderer_remesh.render(this.scene, this.camera);
+
+				this.camera.layers.enable(3);
+				this.renderer_dual.render(this.scene, this.camera);
+				this.camera.layers.disable(2);
+
+				this.renderer_result.render(this.scene, this.camera);
+				this.camera.layers.disable(3);
+
 				requestAnimationFrame(this.loop.bind(this));
 			}
 		}

@@ -5,6 +5,7 @@
 		<title>Slides</title>
 		<link rel="stylesheet" href="./multiCol.css">
 		<link rel="stylesheet" href="./Reveal/reveal.css">
+		<!-- <link rel="stylesheet" href="./Reveal/theme/black.css"> -->
 		<link rel="stylesheet" href="./Reveal/theme/solarized.css">
 	</head>
 
@@ -32,7 +33,6 @@
 
 				<section id="Overview"> 
 					Overview
-
 					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
 						<div class="r-hstack"> 
 							<!-- <img src="Images/Title/ICube.png" width="200px" height="200px" style="padding-right: 5%;"> -->
@@ -122,26 +122,73 @@
 							</div>
 						</div>
 				</section>
+
+				<section id="Sphere_Partition"> 
+					Complex Branching Points
+					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
+						<div class="r-hstack">
+							<div style="padding-right:2%">  
+								<div class="r-vstack">  
+									<div class="r-hstack" style="scroll-padding-bottom:2%">
+										<canvas  id="SP_Points" width="250" height="250" style="padding-right:2%"></canvas>
+										<canvas  id="SP_Raw" width="250" height="250" style="padding-right:2%"></canvas>
+										<canvas  id="SP_Remesh" width="250" height="250"></canvas>
+									</div>
+									<div class="r-hstack">
+										<canvas  id="SP_Dual" width="250" height="250" style="padding-right:2%"></canvas>
+										<canvas  id="SP_Result" width="250" height="250"></canvas>
+									</div>
+								</div>
+							</div>
+						</div>
+				</section>
+
+				<section id="Flat_Partition"> 
+					Complex Branching Points
+					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
+						<div class="r-hstack">
+							<div style="padding-right:2%">  
+								<div class="r-vstack">  
+									<!-- <div class="r-hstack" style="scroll-padding-bottom:2%">
+										<canvas  id="SP_Points" width="250" height="250" style="padding-right:2%"></canvas>
+										<canvas  id="SP_Raw" width="250" height="250" style="padding-right:2%"></canvas>
+										<canvas  id="SP_Remesh" width="250" height="250"></canvas>
+									</div>
+									<div class="r-hstack">
+										<canvas  id="SP_Dual" width="250" height="250" style="padding-right:2%"></canvas>
+										<canvas  id="SP_Result" width="250" height="250"></canvas>
+									</div> -->
+								</div>
+							</div>
+						</div>
+				</section>
 			</div>
 		</div>
 
 		<script type="module">
 			import Reveal from './Reveal/reveal.esm.js'
 			import Slide from './Slide.js'
-			import Renderer from './CMapJS/Renderer.js';
-			import * as THREE from './CMapJS/three.module.js';
-			import {OrbitControls} from './CMapJS/OrbitsControls.js';
+			import Renderer from './CMapJS/Rendering/Renderer.js';
+			import * as THREE from './CMapJS/Dependencies/three.module.js';
+			import {OrbitControls} from './CMapJS/Dependencies/OrbitsControls.js';
 			import {load_graph} from './CMapJS/IO/Graph_Formats/Graph_IO.js' 
 			import {load_cmap2, export_cmap2} from './CMapJS/IO/Surface_Formats/CMap2_IO.js' 
 			import {load_cmap3} from './CMapJS/IO/Volumes_Formats/CMap3_IO.js' 
 			import {BoundingBox} from './CMapJS/Utils/BoundingBox.js';
-			import {slide_overview, slide_process_0, slide_process_1, slide_process_2} from './slides.js';
+			import {
+				slide_overview,
+				slide_process_0, 
+				slide_process_1, 
+				slide_process_2,
+				slide_sphere_partition
+			} from './slides.js';
 
 			let slides = new Array();
 			slides["Overview"] = slide_overview;
 			slides["Process_0"] = slide_process_0;
 			slides["Process_1"] = slide_process_1;
 			slides["Process_2"] = slide_process_2;
+			slides["Sphere_Partition"] = slide_sphere_partition;
 			// slides[] = ;
 
 			let active_slide;
@@ -180,7 +227,13 @@
 					document.getElementById("Process2_quality")
 				);
 
-
+				slides["Sphere_Partition"].init(
+					document.getElementById("SP_Points"),
+					document.getElementById("SP_Raw"),
+					document.getElementById("SP_Remesh"),
+					document.getElementById("SP_Dual"),
+					document.getElementById("SP_Result")
+				);
 			});
 			
 		</script>
