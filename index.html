@@ -111,7 +111,10 @@
 						<div class="r-hstack">
 							<div style="padding-right:2%">  
 								<div class="r-vstack">  
-									<canvas  id="Process2_result" width="300" height="450"></canvas>
+									<div class="r-hstack">
+										<canvas  id="Process2_result" width="300" height="450" style="padding-right:2%"></canvas>
+										<canvas  id="Process2_quality" width="300" height="450" ></canvas>
+									</div>
 									<div>
 										<p style="font-size: 30px;">Optimized<br>Mesh</p>
 									</div>
@@ -173,10 +176,11 @@
 				);
 
 				slides["Process_2"].init(
-					document.getElementById("Process2_result")
+					document.getElementById("Process2_result"),
+					document.getElementById("Process2_quality")
 				);
 
-				
+
 			});
 			
 		</script>

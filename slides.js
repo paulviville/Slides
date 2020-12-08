@@ -31,7 +31,7 @@ let mesh_face_material = new THREE.MeshLambertMaterial({
 
 let mesh_edge_material = new THREE.LineBasicMaterial({
 	color: mesh_edge_color,
-	linewidth: 1,
+	linewidth: 0.5,
 	polygonOffset: true,
 	polygonOffsetFactor: -0.5
 });
@@ -53,12 +53,11 @@ let fertility_scaffold = load_cmap2('off', fertility_scaffold_off);
 let fertility_vol = load_cmap3('mesh', fertility_mesh);
 
 cactus_opt_mesh.set_embeddings(cactus_opt_mesh.vertex2);
-cactus_opt_mesh.debug();
 cactus_opt_mesh.set_embeddings(cactus_opt_mesh.volume);
 let scaled_jacobian = compute_scaled_jacobian(cactus_opt_mesh);
 
-console.log(scaled_jacobian)
-let sj, avg_sj = 0, min_sj = Infinity, nb = 0;
+// console.log(scaled_jacobian)
+let sj, avg_sj = 0, min_sj = Infinity, max_sj = -Infinity, nb = 0;
 cactus_opt_mesh.foreach(cactus_opt_mesh.volume, wd => {
 	if(cactus_opt_mesh.is_boundary(wd))
 		return;
@@ -66,10 +65,22 @@ cactus_opt_mesh.foreach(cactus_opt_mesh.volume, wd => {
 	avg_sj += sj;
 	++nb;
 	min_sj = min_sj > sj ? sj : min_sj;
+	max_sj = max_sj < sj ? sj : max_sj;
 });
-console.log(avg_sj / nb, min_sj)
+
+let cactus_volume_colors = cactus_opt_mesh.add_attribute(cactus_opt_mesh.volume, "volume_color");
+let sj_diff = max_sj - min_sj;
+let green = new THREE.Color(0x2EEE71);
+let red = new THREE.Color(0xF74C3C);
+cactus_opt_mesh.foreach(cactus_opt_mesh.volume, wd => {
+	let sj_value = scaled_jacobian[cactus_opt_mesh.cell(cactus_opt_mesh.volume, wd)];
+	let value = (sj_value - min_sj) / sj_diff;
+
+	cactus_volume_colors[cactus_opt_mesh.cell(cactus_opt_mesh.volume, wd)] = red.clone().lerp(green, value);
+});
+
 let bb = BoundingBox(fertility_simplified_skel.get_attribute(fertility_simplified_skel.vertex, "position"))
-console.log(bb)
+// console.log(bb)
 export let slide_overview = new Slide(
 	function(input, output)
 	{
@@ -112,6 +123,7 @@ export let slide_overview = new Slide(
 		this.fertility_vol = new Renderer(fertility_vol);
 		this.fertility_vol.volumes.create({layer: 1, material: mesh_face_material}).add(this.group);
 		this.fertility_vol.volumes.rescale(0.85);
+		// this.fertility_vol.edges.create({layer: 1, material: mesh_edge_material}).add(this.group);
 
 		this.fertility_simplified_skel = new Renderer(fertility_simplified_skel);
 		this.fertility_simplified_skel.edges.create({layer: 1, material: mesh_edge_material}).add(this.group);
@@ -141,13 +153,29 @@ export let slide_overview = new Slide(
 		let v = new THREE.Vector3;
 		this.clock = new Clock(true);
 		this.time = 0;
-		console.log(this.camera.getWorldDirection(v))
+		// console.log(this.camera.getWorldDirection(v))
 
 		this.loop = function(){
 			if(this.running){
 				this.time += this.clock.getDelta();
 				this.group.setRotationFromAxisAngle(axis, Math.PI / 30 * this.time);
-				this.fertility_vol.volumes.mesh.children.forEach(c => {c.getWorldPosition(v); c.visible = (v.x + v.z) < 0; });
+				// this.fertility_vol.volumes.mesh.children.forEach(c => {c.getWorldPosition(v); c.visible = (v.x + v.z) < 0; });
+				this.fertility_vol.volumes.mesh.children.forEach(
+					c => {c.getWorldPosition(v); if((v.x + v.z) > 0){
+						let scale = c.scale.x;
+						if(scale > 0){
+							scale -= 0.05;
+							c.scale.set(scale, scale, scale)
+						}
+					}
+					else{
+						let scale = c.scale.x;
+						if(scale < 0.85){
+							scale += 0.05;
+							c.scale.set(scale, scale, scale)
+						}
+					}
+				});
 				this.camera.layers.enable(0);
 				this.renderer_input.render(this.scene, this.camera);
 				this.camera.layers.disable(0);
@@ -333,7 +361,7 @@ export let slide_process_1 = new Slide(
 );
 
 export let slide_process_2 = new Slide(
-	function(result){
+	function(result, quality){
 		this.camera = new THREE.PerspectiveCamera(75, result.width / result.height, 0.1, 1000.0);
 		this.camera.position.set(0, 0, 0.6);
 
@@ -341,15 +369,33 @@ export let slide_process_2 = new Slide(
 		let ambiantLight = new THREE.AmbientLight(0xFFFFFF, ambiant_light_int);
 		let pointLight = new THREE.PointLight(0xFFFFFF, point_light_int);
 		pointLight.position.set(10,8,5);
+		ambiantLight.layers.enable(1);
+		pointLight.layers.enable(1);
 		this.scene.add(ambiantLight);
 		this.scene.add(pointLight);
 
 		this.group = new THREE.Group;
 		this.scene.add(this.group);
 
+		this.surface_renderer = new Renderer(cactus_surface);
+		this.surface_renderer.faces.create({
+			material: new THREE.MeshLambertMaterial({
+				color: 0x888888,
+				transparent: true,
+				opacity: 0.2
+			})
+		}).add(this.group);
+
+
 		this.initial_mesh_renderer = new Renderer(cactus_opt_mesh);
-		this.initial_mesh_renderer.volumes.create({ material: mesh_face_alpha_material}).add(this.group);
+		this.initial_mesh_renderer.volumes.create({ volume_colors: cactus_volume_colors}).add(this.group);
+		// this.initial_mesh_renderer.volumes.create({ material: mesh_face_alpha_material}).add(this.group);
 		this.initial_mesh_renderer.volumes.rescale(0.8);
+
+		this.cactus_opt_mesh = new Renderer(cactus_opt_mesh);
+		this.cactus_opt_mesh.volumes.create({layer: 1, material: mesh_face_material}).add(this.group);
+		// this.initial_mesh_renderer.volumes.create({ material: mesh_face_alpha_material}).add(this.group);
+		this.cactus_opt_mesh.volumes.rescale(0.8);
 
 		this.renderer_result = new THREE.WebGLRenderer({
 			canvas: result,
@@ -357,6 +403,13 @@ export let slide_process_2 = new Slide(
 			alpha: true
 		});
 		let orbit_controls  = new OrbitControls(this.camera, this.renderer_result.domElement);
+
+		this.renderer_quality = new THREE.WebGLRenderer({
+			canvas: quality,
+			antialias: true,
+			alpha: true
+		});
+		let orbit_controls2  = new OrbitControls(this.camera, this.renderer_quality.domElement);
 
 		const axis = new THREE.Vector3(0, 1, 0);
 		let v = new THREE.Vector3;
@@ -366,7 +419,29 @@ export let slide_process_2 = new Slide(
 			if(this.running){
 				this.time += this.clock.getDelta();
 				this.group.setRotationFromAxisAngle(axis, Math.PI / 30 * this.time);
+				this.initial_mesh_renderer.volumes.mesh.children.forEach(
+					c => {c.getWorldPosition(v); if((v.x + v.z) > 0){
+						let scale = c.scale.x;
+						if(scale > 0){
+							scale -= 0.05;
+							c.scale.set(scale, scale, scale)
+						}
+					}
+					else{
+						let scale = c.scale.x;
+						if(scale < 0.95){
+							scale += 0.05;
+							c.scale.set(scale, scale, scale)
+						}
+					}
+				});
+
+				this.camera.layers.disable(0);
+				this.camera.layers.enable(1);
 				this.renderer_result.render(this.scene, this.camera);
+				this.camera.layers.disable(1);
+				this.camera.layers.enable(0);
+				this.renderer_quality.render(this.scene, this.camera);
 				requestAnimationFrame(this.loop.bind(this));
 			}
 		}
