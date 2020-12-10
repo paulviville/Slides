@@ -16,152 +16,247 @@
 				<section id="Title" data-visibility="uncounted"> 
 					<h3 class='r-fit-text'>Hexahedral  Mesh  Generation</h3>
 					<h3 class='r-fit-text'>For Tubular Shapes Using Skeletons and Connection Surfaces</h3>
-					<!-- <div style="display:flex; justify-content:space-evenly; font-size:0.5em; padding-top: 4.2em;"> -->
 					<div class="r-hstack" style="font-size: 0.5em; padding-top:2.7em;">
 						<div style="padding-right:10%" >P. Viville</div>
 						<div style="padding-right:10%">P. Kraemer</div>
 						<div style="">D. Bechmann</div>
 					</div>
 					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
-						<div class="r-hstack">
-							<img src="Images/Title/IGG.png" height="40px" style="padding-right: 5%;">
-							<img src="Images/Title/ICube.png" height="40px" style="padding-right: 5%;">
-							<img src="Images/Title/CNRS.png" height="40px" style="padding-right: 5%;">
-							<img src="Images/Title/unistra.png" height="40px" >
-						</div>
+					<div class="r-hstack">
+						<img src="Images/Title/IGG.png" height="40px" style="padding-right: 5%;">
+						<img src="Images/Title/ICube.png" height="40px" style="padding-right: 5%;">
+						<img src="Images/Title/CNRS.png" height="40px" style="padding-right: 5%;">
+						<img src="Images/Title/unistra.png" height="40px" >
+					</div>
 				</section>
+
+				<!-- <section id="Comparisions_Metatron"> 
+					Comparisons
+					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
+					<div class="r-vstack">  
+						<div class="r-hstack">
+							<div style="padding-right:2%">  
+								<canvas id="Meta_live" width="200" height="166" ></canvas>
+								<p style="font-size:18px; margin-top: 0px;">Branching<br>Point</p>
+							</div>
+							<div class="fragment" style="padding-right:2%">  
+								<canvas id="Meta_ours" width="200" height="166"></canvas>
+								<p style="font-size:18px; margin-top: 0px;">Delaunay<br>Triangulation</p>
+							</div>
+						</div>
+					</div>
+				</section> -->
 
 				<section id="Overview"> 
 					Overview
 					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
-						<div class="r-hstack"> 
-							<!-- <img src="Images/Title/ICube.png" width="200px" height="200px" style="padding-right: 5%;"> -->
-							<canvas id="overview_input" width="350" height="400"></canvas>
-							<img src="Images/Utils/arrow.png" height="80px" style="padding-right: 1%; padding-left: 1%;">
-							<canvas id="overview_output" width="350" height="400"></canvas>
-							<!-- <img src="Images/Title/unistra.png" width="200px" height="200px" > -->
-						</div>
+					<div class="r-hstack"> 
+						<canvas id="overview_input" width="350" height="400"></canvas>
+						<img src="Images/Utils/arrow.png" height="80px" style="padding-right: 1%; padding-left: 1%;">
+						<canvas id="overview_output" width="350" height="400"></canvas>
+					</div>
 				</section>
 
-				<section id="Process_0"> 
-					Process
+				<!-- <section id="Introduction_0"> 
+					Introduction
 					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
-						<div class="r-hstack">
-							<div style="padding-right:2%">  
-								<div class="r-vstack">  
-									<canvas  id="Process0_surface" width="220" height="400"></canvas>
-									<div>
-										<p style="font-size: 30px;">Input<br>Surface</p>
-									</div>
-								</div>
-							</div>
-							<div class="fragment" style="padding-right:2%">  
-								<div class="r-vstack" style="padding-right:2%">  
-									<canvas id="Process0_skel" width="220" height="400"></canvas>
-									<div>
-										<p style="font-size: 30px;">Extracted<br>Skeleton</p>
-									</div>
-								</div>
-							</div>
-							<div class="fragment" style="padding-right:2%">  
-								<div class="r-vstack">  
-									<canvas id="Process0_skel_simple" width="220" height="400"></canvas>
-									<div>
-										<p style="font-size: 30px;">Resampled<br>Skeleton</p>
-									</div>
-								</div>
-							</div>
-						</div>
-				</section>
+				</section> -->
 
-				<section id="Process_1"> 
-					Process
+				<!-- <section id="Existing Work"> 
+					Connection Surfaces
 					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
-						<div class="r-hstack">
-							<div style="padding-right:2%">  
-								<div class="r-vstack">  
-									<canvas  id="Process1_scaffold" width="220" height="400"></canvas>
-									<div>
-										<p style="font-size: 30px;">Skeleton<br>Scaffold</p>
-									</div>
-								</div>
-							</div>
-							<div class="fragment" style="padding-right:2%">  
-								<div class="r-vstack" style="padding-right:2%">  
-									<canvas id="Process1_initial_mesh" width="220" height="400"></canvas>
-									<div>
-										<p style="font-size: 30px;">Initial<br>Mesh</p>
-									</div>
-								</div>
-							</div>
-							<div class="fragment" style="padding-right:2%">  
-								<div class="r-vstack">  
-									<canvas id="Process1_surface_fit_mesh" width="220" height="400"></canvas>
-									<div>
-										<p style="font-size: 30px;">Surface fit<br>Mesh</p>
-									</div>
-								</div>
-							</div>
-						</div>
-				</section>
+				</section> -->
 
-				<section id="Process_2"> 
-					Process
+				<!-- <section id="Connection_Surfaces"> 
+					Connection Surfaces
 					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
-						<div class="r-hstack">
-							<div style="padding-right:2%">  
-								<div class="r-vstack">  
-									<div class="r-hstack">
-										<canvas  id="Process2_result" width="300" height="450" style="padding-right:2%"></canvas>
-										<canvas  id="Process2_quality" width="300" height="450" ></canvas>
-									</div>
-									<div>
-										<p style="font-size: 30px;">Optimized<br>Mesh</p>
-									</div>
-								</div>
-							</div>
-						</div>
-				</section>
+				</section> -->
+
+				<!-- <section id="Geometry"> 
+					Geometry
+					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
+				</section> -->
+
+				<!-- <section id="Hexahedra Generation"> 
+					Hexahedra Generation
+					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
+				</section> -->
+
+				<!-- <section id="Connectivity"> 
+					Connectivity
+					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
+				</section> -->
 
 				<section id="Sphere_Partition"> 
 					Complex Branching Points
 					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
+					<div class="r-vstack">  
 						<div class="r-hstack">
 							<div style="padding-right:2%">  
-								<div class="r-vstack">  
-									<div class="r-hstack" style="scroll-padding-bottom:2%">
-										<canvas  id="SP_Points" width="250" height="250" style="padding-right:2%"></canvas>
-										<canvas  id="SP_Raw" width="250" height="250" style="padding-right:2%"></canvas>
-										<canvas  id="SP_Remesh" width="250" height="250"></canvas>
-									</div>
-									<div class="r-hstack">
-										<canvas  id="SP_Dual" width="250" height="250" style="padding-right:2%"></canvas>
-										<canvas  id="SP_Result" width="250" height="250"></canvas>
-									</div>
-								</div>
+								<canvas id="SP_Points" width="200" height="166" ></canvas>
+								<p style="font-size:18px; margin-top: 0px;">Branching<br>Point</p>
+							</div>
+							<div class="fragment" style="padding-right:2%">  
+								<canvas id="SP_Raw" width="200" height="166"></canvas>
+								<p style="font-size:18px; margin-top: 0px;">Delaunay<br>Triangulation</p>
+							</div>
+							<div class="fragment">  
+								<canvas id="SP_Remesh" width="200" height="166"></canvas>
+								<p style="font-size:18px; margin-top: 0px;">Delaunay<br>Remeshed</p>
 							</div>
 						</div>
+						<div class="r-hstack">
+							<div class="fragment" style="padding-right:2%">  
+								<canvas id="SP_Dual" width="200" height="166"></canvas>
+								<p style="font-size:18px; margin-top: 0px;">Dual<br>Construction</p>
+							</div>
+							<div class="fragment">  
+								<canvas id="SP_Result" width="200" height="166"></canvas>
+								<p style="font-size:18px; margin-top: 0px;">Resulting<br>Partition</p>
+							</div>
+						</div>
+					</div>
 				</section>
 
-				<section id="Flat_Partition"> 
-					Complex Branching Points
+				<!-- <section id="Failure_Partition"> 
+					Connection Surfaces
 					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
-						<div class="r-hstack">
-							<div style="padding-right:2%">  
-								<div class="r-vstack">  
-									<!-- <div class="r-hstack" style="scroll-padding-bottom:2%">
-										<canvas  id="SP_Points" width="250" height="250" style="padding-right:2%"></canvas>
-										<canvas  id="SP_Raw" width="250" height="250" style="padding-right:2%"></canvas>
-										<canvas  id="SP_Remesh" width="250" height="250"></canvas>
-									</div>
-									<div class="r-hstack">
-										<canvas  id="SP_Dual" width="250" height="250" style="padding-right:2%"></canvas>
-										<canvas  id="SP_Result" width="250" height="250"></canvas>
-									</div> -->
-								</div>
-							</div>
+				</section> -->
+
+				<section id="Flat_Partition"> 
+					Flat Branching Points
+					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
+					<div class="r-hstack">
+						<div style="padding-right:2%">  
+							<canvas id="FP_3Points" width="200" height="166" ></canvas>
+							<p style="font-size:18px; margin-top: 0px;">3 Points</p>
 						</div>
+						<div class="fragment" style="padding-right:2%">  
+							<canvas id="FP_4Points" width="200" height="166"></canvas>
+							<p style="font-size:18px; margin-top: 0px;">4 Points</p>
+						</div>
+						<div class="fragment">  
+							<canvas id="FP_5Points" width="200" height="166"></canvas>
+							<p style="font-size:18px; margin-top: 0px;">5 Points</p>
+						</div>
+					</div>
 				</section>
+
+				<section id="Ortho_Partition"> 
+					Orthogonal Branching Points
+					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
+					<div class="r-hstack">
+						<div style="padding-right:2%">  
+							<canvas id="OP_3Points" width="200" height="200" ></canvas>
+							<p style="font-size:18px; margin-top: 0px;">3 Points</p>
+						</div>
+						<div class="fragment" style="padding-right:2%">  
+							<canvas id="OP_4Points" width="200" height="200"></canvas>
+							<p style="font-size:18px; margin-top: 0px;">4 Points</p>
+						</div>
+						<div class="fragment">  
+							<canvas id="OP_5Points" width="200" height="200"></canvas>
+							<p style="font-size:18px; margin-top: 0px;">5 Points</p>
+						</div>
+					</div>
+				</section>
+
+				<section id="Pipeline_0"> 
+					Pipeline
+					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
+					<div class="r-hstack">
+						<div style="padding-right:2%;">  
+							<canvas  id="Pipeline0_surface" width="220" height="360"></canvas>
+							<p style="font-size: 30px;">Input<br>Surface</p>
+						</div>
+						<div class="fragment" style="padding-right:2%">  
+							<canvas id="Pipeline0_skel" width="220" height="360"></canvas>
+							<p style="font-size: 30px;">Extracted<br>Skeleton</p>
+						</div>
+						<div class="fragment">  
+							<canvas id="Pipeline0_skel_simple" width="220" height="360"></canvas>
+							<p style="font-size: 30px;">Reprocessed<br>Skeleton</p>
+						</div>
+					</div>
+				</section>
+
+				<section id="Pipeline_1"> 
+					Pipeline
+					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
+					<div class="r-hstack">
+						<div style="padding-right:2%;">   
+							<canvas  id="Pipeline1_scaffold" width="220" height="360"></canvas>
+							<p style="font-size: 30px;">Skeleton<br>Scaffold</p>
+						</div>
+						<div class="fragment" style="padding-right:2%">  
+							<canvas id="Pipeline1_initial_mesh" width="220" height="360"></canvas>
+							<p style="font-size: 30px;">Initial<br>Mesh</p>
+						</div>
+						<div class="fragment">  
+							<canvas id="Pipeline1_surface_fit_mesh" width="220" height="360"></canvas>
+							<p style="font-size: 30px;">Surface fit<br>Mesh</p>
+						</div>
+					</div>
+				</section>
+
+				<section id="Pipeline_2"> 
+					Pipeline
+					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
+					<div class="r-hstack">
+						<div style="padding-right:2%;">   
+							<canvas  id="Pipeline2_padding" width="220" height="360"></canvas>
+							<p style="font-size: 30px;">Padded<br>Mesh</p>
+						</div>
+						<div class="fragment" style="padding-right:2%">  
+							<canvas id="Pipeline2_result" width="220" height="360"></canvas>
+							<p style="font-size: 30px;">Subdivided<br>Mesh</p>
+						</div>
+						<div class="fragment">  
+							<canvas id="Pipeline2_quality" width="220" height="360"></canvas>
+							<p style="font-size: 30px;">Optimized<br>Mesh</p>
+						</div>
+					</div>
+				</section>
+
+				<!-- <section id="Comparisions_Santa"> 
+					Comparisons
+					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
+				</section> -->
+
+				<!-- <section id="Comparisions_Metatron"> 
+					Comparisons
+					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
+				</section> -->
+
+				<!-- <section id="Edge_cases"> 
+					Comparisons
+					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
+				</section> -->
+
+				<!-- <section id="Results_Horse"> 
+					Results
+					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
+				</section> -->
+
+				<!-- <section id="Results_Dinopet"> 
+					Results
+					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
+				</section> -->
+
+				<!-- <section id="Results_Fertility"> 
+					Results
+					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
+				</section> -->
+
+				<!-- <section id="Results_Cycles"> 
+					Results
+					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
+				</section> -->
+
+				<!-- <section> 
+					Acknowledgments
+					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
+				</section> -->
 			</div>
 		</div>
 
@@ -180,17 +275,22 @@
 				slide_process_0, 
 				slide_process_1, 
 				slide_process_2,
-				slide_sphere_partition
+				slide_sphere_partition,
+				slide_flat_partition,
+				slide_ortho_partition,
+				slide_metatron_comparison,
 			} from './slides.js';
 
 			let slides = new Array();
 			slides["Overview"] = slide_overview;
-			slides["Process_0"] = slide_process_0;
-			slides["Process_1"] = slide_process_1;
-			slides["Process_2"] = slide_process_2;
+			slides["Pipeline_0"] = slide_process_0;
+			slides["Pipeline_1"] = slide_process_1;
+			slides["Pipeline_2"] = slide_process_2;
 			slides["Sphere_Partition"] = slide_sphere_partition;
-			// slides[] = ;
-
+			slides["Flat_Partition"] = slide_flat_partition;
+			slides["Ortho_Partition"] = slide_ortho_partition;
+			slides["Comparisions_Metatron"] = slide_metatron_comparison;
+			
 			let active_slide;
 			Reveal.addEventListener('slidechanged', function(event) {
 				if(active_slide) active_slide.close();
@@ -210,21 +310,22 @@
 				 	document.getElementById("overview_output")
 				);
 
-				slides["Process_0"].init(
-					document.getElementById("Process0_surface"),
-				 	document.getElementById("Process0_skel"),
-					document.getElementById("Process0_skel_simple")
+				slides["Pipeline_0"].init(
+					document.getElementById("Pipeline0_surface"),
+				 	document.getElementById("Pipeline0_skel"),
+					document.getElementById("Pipeline0_skel_simple")
 				);
 
-				slides["Process_1"].init(
-					document.getElementById("Process1_scaffold"),
-					document.getElementById("Process1_initial_mesh"),
-					document.getElementById("Process1_surface_fit_mesh")
+				slides["Pipeline_1"].init(
+					document.getElementById("Pipeline1_scaffold"),
+					document.getElementById("Pipeline1_initial_mesh"),
+					document.getElementById("Pipeline1_surface_fit_mesh")
 				);
 
-				slides["Process_2"].init(
-					document.getElementById("Process2_result"),
-					document.getElementById("Process2_quality")
+				slides["Pipeline_2"].init(
+					document.getElementById("Pipeline2_padding"),
+					document.getElementById("Pipeline2_result"),
+					document.getElementById("Pipeline2_quality")
 				);
 
 				slides["Sphere_Partition"].init(
@@ -233,6 +334,23 @@
 					document.getElementById("SP_Remesh"),
 					document.getElementById("SP_Dual"),
 					document.getElementById("SP_Result")
+				);
+
+				slides["Flat_Partition"].init(
+					document.getElementById("FP_3Points"),
+					document.getElementById("FP_4Points"),
+					document.getElementById("FP_5Points")
+				);
+
+				slides["Ortho_Partition"].init(
+					document.getElementById("OP_3Points"),
+					document.getElementById("OP_4Points"),
+					document.getElementById("OP_5Points")
+				);
+
+				slides["Comparisions_Metatron"].init(
+					document.getElementById("Meta_live"),
+					document.getElementById("Meta_ours"),
 				);
 			});
 			
