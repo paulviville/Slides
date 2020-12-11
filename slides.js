@@ -85,9 +85,9 @@ let metatron_liv = load_cmap3('mesh', metatron_liv_mesh);
 let metatron = load_cmap3('mesh', metatron_mesh);
 
 // console.log("padding");
-// let pos_pad = cactus_subdivided.get_attribute(cactus_subdivided.vertex, "position");
-// let bb = BoundingBox(pos_pad)
-// console.log(bb)
+let pos_pad = metatron_liv.get_attribute(metatron_liv.vertex, "position");
+let bb = BoundingBox(pos_pad)
+console.log(bb)
 
 cactus_opt_mesh.set_embeddings(cactus_opt_mesh.vertex2);
 cactus_opt_mesh.set_embeddings(cactus_opt_mesh.volume);
@@ -114,6 +114,32 @@ cactus_opt_mesh.foreach(cactus_opt_mesh.volume, wd => {
 
 	cactus_volume_colors[cactus_opt_mesh.cell(cactus_opt_mesh.volume, wd)] = red.clone().lerp(green, value);
 });
+
+function clip_volumes( vol_renderer,
+	planes = [[0, 0, 1]], offset = 0, 
+	min = 0, max = 0.95, speed = 0.05){
+	let v = new THREE.Vector3;
+	vol_renderer.volumes.mesh.children.forEach(
+	c => {
+		c.getWorldPosition(v); 
+		planes.forEach(p => {
+			if((p[0] * v.x + p[1] * v.y + p[2] * v.z) > offset){
+				let scale = c.scale.x;
+				if(scale > min){
+					scale -= speed;
+					c.scale.set(scale, scale, scale);
+				}
+			}
+			else{
+				let scale = c.scale.x;
+				if(scale < max){
+					scale += speed;
+					c.scale.set(scale, scale, scale);
+				}
+			}
+		})
+	});
+}
 
 // let bb = BoundingBox(fertility_simplified_skel.get_attribute(fertility_simplified_skel.vertex, "position"))
 // console.log(bb)
@@ -919,7 +945,7 @@ export let slide_metatron_comparison = new Slide(
 		const context_ours = DOM_ours.getContext('2d');
 
 		this.camera = new THREE.PerspectiveCamera(75, DOM_livesu.width / DOM_livesu.height, 0.1, 1000.0);
-		this.camera.position.set(0, 0, 2.1);
+		this.camera.position.set(0, 0, 1.8);
 
 		const orbit_controls0  = new OrbitControls(this.camera, DOM_livesu);
 		const orbit_controls1  = new OrbitControls(this.camera, DOM_ours);
@@ -949,8 +975,14 @@ export let slide_metatron_comparison = new Slide(
 		const axis = new THREE.Vector3(0.3, 0.7, 0).normalize();
 		this.clock = new Clock(true);
 		this.time = 0;
+		this.clipping = false;
+		this.toggle_clipping = function(){this.clipping = !this.clipping};
 		this.loop = function(){
 			if(this.running){
+				if(this.clipping){
+					clip_volumes(this.metatron_renderer);
+					clip_volumes(this.metatron_liv_renderer);
+				}
 				this.time += this.clock.getDelta();
 				this.group.setRotationFromAxisAngle(axis, Math.PI / 30 * this.time);
 

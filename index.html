@@ -30,22 +30,26 @@
 					</div>
 				</section>
 
-				<!-- <section id="Comparisions_Metatron"> 
+				<section id="Comparisions_Metatron"> 
 					Comparisons
 					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
 					<div class="r-vstack">  
 						<div class="r-hstack">
 							<div style="padding-right:2%">  
-								<canvas id="Meta_live" width="200" height="166" ></canvas>
-								<p style="font-size:18px; margin-top: 0px;">Branching<br>Point</p>
+								<canvas id="Meta_live" width="340" height="340" ></canvas>
+								<p style="font-size:20px; margin-top: 0px;">(Livesu et al.,  2020)<br>SJ: min:0.682 - max:0.941</p>
 							</div>
-							<div class="fragment" style="padding-right:2%">  
-								<canvas id="Meta_ours" width="200" height="166"></canvas>
-								<p style="font-size:18px; margin-top: 0px;">Delaunay<br>Triangulation</p>
+							<div>  
+								<canvas id="Meta_ours" width="340" height="340"></canvas>
+								<p style="font-size:20px; margin-top: 0px;">Ours<br>SJ: min:0.820 - max:0.981</p>
 							</div>
 						</div>
+						<div>
+							Metatron
+						</div>
 					</div>
-				</section> -->
+					<div class="fragment" id="Metatron_clipping"></div>
+				</section>
 
 				<section id="Overview"> 
 					Overview
@@ -299,6 +303,15 @@
 				if(active_slide) active_slide.open();
 			});
 
+
+			let fragment_events = [];
+			Reveal.addEventListener('fragmentshown', function(event) {
+				console.log(event.fragment.id);
+				if(fragment_events[event.fragment.id])
+					fragment_events[event.fragment.id]()
+				
+			});
+
 			Reveal.initialize({
 				touch: false, 
 				slideNumber: 'c/t',
@@ -352,6 +365,7 @@
 					document.getElementById("Meta_live"),
 					document.getElementById("Meta_ours"),
 				);
+				fragment_events["Metatron_clipping"] = slides["Comparisions_Metatron"].toggle_clipping.bind(slides["Comparisions_Metatron"]);
 			});
 			
 		</script>
