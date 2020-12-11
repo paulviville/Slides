@@ -30,26 +30,29 @@
 					</div>
 				</section>
 
-				<section id="Comparisions_Metatron"> 
-					Comparisons
+				<!-- <section id="Results_Horse"> 
+					Results
 					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
-					<div class="r-vstack">  
-						<div class="r-hstack">
-							<div style="padding-right:2%">  
-								<canvas id="Meta_live" width="340" height="340" ></canvas>
-								<p style="font-size:20px; margin-top: 0px;">(Livesu et al.,  2020)<br>SJ: min:0.682 - max:0.941</p>
-							</div>
-							<div>  
-								<canvas id="Meta_ours" width="340" height="340"></canvas>
-								<p style="font-size:20px; margin-top: 0px;">Ours<br>SJ: min:0.820 - max:0.981</p>
-							</div>
-						</div>
-						<div>
-							Metatron
-						</div>
+					<div style="padding-right:2%">  
+						<canvas id="Result_Horse" width="400" height="400" ></canvas>
+						<p style="font-size:20px; margin-top: 0px;">SJ: min:0.449 - avg:0.912</p>
+						<div>Horse</div>
 					</div>
-					<div class="fragment" id="Metatron_clipping"></div>
-				</section>
+					<div class="fragment" id="Results_Horse_material"></div>
+					<div class="fragment" id="Results_Horse_Clipping"></div>
+				</section> -->
+
+				<!-- <section id="Results_Cycles"> 
+					Results
+					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
+					<div style="padding-right:2%">  
+						<canvas id="Result_Cycles" width="400" height="400" ></canvas>
+						<p style="font-size:20px; margin-top: 0px;">SJ: min:0.316 - avg:0.937</p>
+						<div>Cycles</div>
+					</div>
+					<div class="fragment" id="Results_Cycles_material"></div>
+					<div class="fragment" id="Results_Cycles_Clipping"></div>
+				</section> -->
 
 				<section id="Overview"> 
 					Overview
@@ -59,6 +62,7 @@
 						<img src="Images/Utils/arrow.png" height="80px" style="padding-right: 1%; padding-left: 1%;">
 						<canvas id="overview_output" width="350" height="400"></canvas>
 					</div>
+					<div class="fragment" id="Overview_clipping"></div>
 				</section>
 
 				<!-- <section id="Introduction_0"> 
@@ -220,6 +224,7 @@
 							<p style="font-size: 30px;">Optimized<br>Mesh</p>
 						</div>
 					</div>
+					<div class="fragment" id="Pipeline2_material"></div>
 				</section>
 
 				<!-- <section id="Comparisions_Santa"> 
@@ -227,10 +232,26 @@
 					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
 				</section> -->
 
-				<!-- <section id="Comparisions_Metatron"> 
+				<section id="Comparisions_Metatron"> 
 					Comparisons
 					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
-				</section> -->
+					<div class="r-vstack">  
+						<div class="r-hstack">
+							<div style="padding-right:2%">  
+								<canvas id="Meta_live" width="340" height="340" ></canvas>
+								<p style="font-size:20px; margin-top: 0px;">(Livesu et al.,  2020)<br>SJ: min:0.682 - avg:0.941</p>
+							</div>
+							<div>  
+								<canvas id="Meta_ours" width="340" height="340"></canvas>
+								<p style="font-size:20px; margin-top: 0px;">Ours<br>SJ: min:0.820 - avg:0.981</p>
+							</div>
+						</div>
+						<div>
+							Metatron
+						</div>
+					</div>
+					<div class="fragment" id="Metatron_clipping"></div>
+				</section>
 
 				<!-- <section id="Edge_cases"> 
 					Comparisons
@@ -242,15 +263,30 @@
 					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
 				</section> -->
 
-				<!-- <section id="Results_Dinopet"> 
+				<section id="Results_Dinopet"> 
 					Results
 					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
-				</section> -->
+					<div style="padding-right:2%">  
+						<canvas id="Result_Dinopet" width="400" height="400" ></canvas>
+						<div>Dinopet</div>
+						<p style="font-size:20px; margin-top: 0px;">SJ: min:0.540 - avg:0.919</p>
+					</div>
+					<div class="fragment" id="Results_Dinopet_material"></div>
+					<div class="fragment" id="Results_Dinopet_Clipping"></div>
+				</section>
 
-				<!-- <section id="Results_Fertility"> 
+
+				<section id="Results_Fertility"> 
 					Results
 					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
-				</section> -->
+					<div style="padding-right:2%">  
+						<canvas id="Result_Fertility" width="500" height="380" ></canvas>
+						<div>Fertility</div>
+						<p style="font-size:20px; margin-top: 0px;">SJ: min:0.543 - avg:0.933</p>
+					</div>
+					<div class="fragment" id="Results_Fertility_material"></div>
+					<div class="fragment" id="Results_Fertility_Clipping"></div>
+				</section>
 
 				<!-- <section id="Results_Cycles"> 
 					Results
@@ -283,6 +319,8 @@
 				slide_flat_partition,
 				slide_ortho_partition,
 				slide_metatron_comparison,
+				slide_fertility_result,
+				slide_dinopet_result,
 			} from './slides.js';
 
 			let slides = new Array();
@@ -294,6 +332,8 @@
 			slides["Flat_Partition"] = slide_flat_partition;
 			slides["Ortho_Partition"] = slide_ortho_partition;
 			slides["Comparisions_Metatron"] = slide_metatron_comparison;
+			slides["Results_Fertility"] = slide_fertility_result;
+			slides["Results_Dinopet"] = slide_dinopet_result;
 			
 			let active_slide;
 			Reveal.addEventListener('slidechanged', function(event) {
@@ -308,8 +348,12 @@
 			Reveal.addEventListener('fragmentshown', function(event) {
 				console.log(event.fragment.id);
 				if(fragment_events[event.fragment.id])
-					fragment_events[event.fragment.id]()
-				
+					fragment_events[event.fragment.id]();
+			});
+			Reveal.addEventListener('fragmenthidden', function(event) {
+				console.log(event.fragment.id);
+				if(fragment_events[event.fragment.id])
+					fragment_events[event.fragment.id]();
 			});
 
 			Reveal.initialize({
@@ -322,6 +366,8 @@
 					document.getElementById("overview_input"),
 				 	document.getElementById("overview_output")
 				);
+				fragment_events["Overview_clipping"] = 
+					slides["Overview"].toggle_clipping.bind(slides["Overview"]);
 
 				slides["Pipeline_0"].init(
 					document.getElementById("Pipeline0_surface"),
@@ -340,6 +386,8 @@
 					document.getElementById("Pipeline2_result"),
 					document.getElementById("Pipeline2_quality")
 				);
+				fragment_events["Pipeline2_material"] = 
+					slides["Pipeline_2"].toggle_material.bind(slides["Pipeline_2"]);
 
 				slides["Sphere_Partition"].init(
 					document.getElementById("SP_Points"),
@@ -365,7 +413,25 @@
 					document.getElementById("Meta_live"),
 					document.getElementById("Meta_ours"),
 				);
-				fragment_events["Metatron_clipping"] = slides["Comparisions_Metatron"].toggle_clipping.bind(slides["Comparisions_Metatron"]);
+				fragment_events["Metatron_clipping"] = 
+					slides["Comparisions_Metatron"].toggle_clipping.bind(slides["Comparisions_Metatron"]);
+			
+				slides["Results_Fertility"].init(
+					document.getElementById("Result_Fertility")
+				);
+				fragment_events["Results_Fertility_material"] = 
+					slides["Results_Fertility"].toggle_material.bind(slides["Results_Fertility"]);
+				fragment_events["Results_Fertility_Clipping"] = 
+					slides["Results_Fertility"].toggle_clipping.bind(slides["Results_Fertility"]);
+			
+				slides["Results_Dinopet"].init(
+					document.getElementById("Result_Dinopet")
+				);
+				fragment_events["Results_Dinopet_material"] = 
+					slides["Results_Dinopet"].toggle_material.bind(slides["Results_Dinopet"]);
+				fragment_events["Results_Dinopet_Clipping"] = 
+					slides["Results_Dinopet"].toggle_clipping.bind(slides["Results_Dinopet"]);
+			
 			});
 			
 		</script>

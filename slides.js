@@ -12,6 +12,7 @@ import {cactus_simplified_cg, cactus_cg, fertility_simplified_cg, fertility_cg} 
 import {fertility_mesh} from './Files/fertility_files.js';
 import {cactus0_mesh, cactus1_mesh, cactus_mesh, cactus_padding_mesh, cactus_subdivided_mesh} from './Files/cactus_files.js';
 import {metatron_mesh, metatron_liv_mesh} from './Files/metatron_files.js';
+import {dinopet_mesh} from './Files/dinopet_files.js';
 import {BoundingBox} from './CMapJS/Utils/BoundingBox.js';
 import compute_scaled_jacobian from './CMapJS/Modeling/Quality/Scaled_Jacobians.js';
 import {Clock} from './CMapJS/Dependencies/three.module.js';
@@ -84,15 +85,21 @@ let ortho_5_surface = load_cmap2('off', SP.ortho_5_off);
 let metatron_liv = load_cmap3('mesh', metatron_liv_mesh);
 let metatron = load_cmap3('mesh', metatron_mesh);
 
+let dinopet_vol = load_cmap3('mesh', dinopet_mesh);
+
+
 // console.log("padding");
-let pos_pad = metatron_liv.get_attribute(metatron_liv.vertex, "position");
+let pos_pad = dinopet_vol.get_attribute(dinopet_vol.vertex, "position");
 let bb = BoundingBox(pos_pad)
 console.log(bb)
+
+
+let green = new THREE.Color(0x2EEE71);
+let red = new THREE.Color(0xF74C3C);
 
 cactus_opt_mesh.set_embeddings(cactus_opt_mesh.vertex2);
 cactus_opt_mesh.set_embeddings(cactus_opt_mesh.volume);
 let scaled_jacobian = compute_scaled_jacobian(cactus_opt_mesh);
-
 let sj, avg_sj = 0, min_sj = Infinity, max_sj = -Infinity, nb = 0;
 cactus_opt_mesh.foreach(cactus_opt_mesh.volume, wd => {
 	if(cactus_opt_mesh.is_boundary(wd))
@@ -106,14 +113,60 @@ cactus_opt_mesh.foreach(cactus_opt_mesh.volume, wd => {
 
 let cactus_volume_colors = cactus_opt_mesh.add_attribute(cactus_opt_mesh.volume, "volume_color");
 let sj_diff = max_sj - min_sj;
-let green = new THREE.Color(0x2EEE71);
-let red = new THREE.Color(0xF74C3C);
+
 cactus_opt_mesh.foreach(cactus_opt_mesh.volume, wd => {
 	let sj_value = scaled_jacobian[cactus_opt_mesh.cell(cactus_opt_mesh.volume, wd)];
 	let value = (sj_value - min_sj) / sj_diff;
 
 	cactus_volume_colors[cactus_opt_mesh.cell(cactus_opt_mesh.volume, wd)] = red.clone().lerp(green, value);
 });
+
+fertility_vol.set_embeddings(fertility_vol.vertex2);
+fertility_vol.set_embeddings(fertility_vol.volume);
+let fertility_sj = compute_scaled_jacobian(fertility_vol);
+sj, avg_sj = 0, min_sj = Infinity, max_sj = -Infinity, nb = 0;
+fertility_vol.foreach(fertility_vol.volume, wd => {
+	if(fertility_vol.is_boundary(wd))
+		return;
+	sj = fertility_sj[fertility_vol.cell(fertility_vol.volume, wd)];
+	avg_sj += sj;
+	++nb;
+	min_sj = min_sj > sj ? sj : min_sj;
+	max_sj = max_sj < sj ? sj : max_sj;
+});
+
+let fertility_volume_colors = fertility_vol.add_attribute(fertility_vol.volume, "volume_color");
+sj_diff = max_sj - min_sj;
+fertility_vol.foreach(fertility_vol.volume, wd => {
+	let sj_value = fertility_sj[fertility_vol.cell(fertility_vol.volume, wd)];
+	let value = (sj_value - min_sj) / sj_diff;
+
+	fertility_volume_colors[fertility_vol.cell(fertility_vol.volume, wd)] = red.clone().lerp(green, value);
+});
+
+dinopet_vol.set_embeddings(dinopet_vol.vertex2);
+dinopet_vol.set_embeddings(dinopet_vol.volume);
+let dinopet_sj = compute_scaled_jacobian(dinopet_vol);
+sj, avg_sj = 0, min_sj = Infinity, max_sj = -Infinity, nb = 0;
+dinopet_vol.foreach(dinopet_vol.volume, wd => {
+	if(dinopet_vol.is_boundary(wd))
+		return;
+	sj = dinopet_sj[dinopet_vol.cell(dinopet_vol.volume, wd)];
+	avg_sj += sj;
+	++nb;
+	min_sj = min_sj > sj ? sj : min_sj;
+	max_sj = max_sj < sj ? sj : max_sj;
+});
+
+let dinopet_volume_colors = dinopet_vol.add_attribute(dinopet_vol.volume, "volume_color");
+sj_diff = max_sj - min_sj;
+dinopet_vol.foreach(dinopet_vol.volume, wd => {
+	let sj_value = dinopet_sj[dinopet_vol.cell(dinopet_vol.volume, wd)];
+	let value = (sj_value - min_sj) / sj_diff;
+
+	dinopet_volume_colors[dinopet_vol.cell(dinopet_vol.volume, wd)] = red.clone().lerp(green, value);
+});
+
 
 function clip_volumes( vol_renderer,
 	planes = [[0, 0, 1]], offset = 0, 
@@ -139,6 +192,13 @@ function clip_volumes( vol_renderer,
 			}
 		})
 	});
+}
+
+function change_volumes_material(vol_renderer, new_mat){
+	vol_renderer.volumes.mesh.children.forEach(
+		c => {
+			c.material = new_mat;
+		});
 }
 
 // let bb = BoundingBox(fertility_simplified_skel.get_attribute(fertility_simplified_skel.vertex, "position"))
@@ -194,29 +254,21 @@ export let slide_overview = new Slide(
 		let v = new THREE.Vector3;
 		this.clock = new Clock(true);
 		this.time = 0;
-
+		this.clipping = false;
+		this.toggle_clipping = function(){
+			this.clipping = !this.clipping
+			if(!this.clipping)
+				this.fertility_vol.volumes.rescale(0.85);
+		};
 
 		this.loop = function(){
 			if(this.running){
+				if(this.clipping){
+					clip_volumes(this.fertility_vol, [[1, 0, 1]], 0.05, 0, 0.85);
+				}
+
 				this.time += this.clock.getDelta();
 				this.group.setRotationFromAxisAngle(axis, Math.PI / 30 * this.time);
-				
-				this.fertility_vol.volumes.mesh.children.forEach(
-					c => {c.getWorldPosition(v); if((v.x + v.z) > 0){
-						let scale = c.scale.x;
-						if(scale > 0){
-							scale -= 0.05;
-							c.scale.set(scale, scale, scale)
-						}
-					}
-					else{
-						let scale = c.scale.x;
-						if(scale < 0.85){
-							scale += 0.05;
-							c.scale.set(scale, scale, scale)
-						}
-					}
-				});
 
 				this.camera.layers.enable(input_layer);
 				main_renderer.setSize(DOM_input.width, DOM_input.height);
@@ -474,58 +526,25 @@ export let slide_process_2 = new Slide(
 		let v = new THREE.Vector3;
 		this.clock = new Clock(true);
 		this.time = 0;
+
+		let material0 = this.initial_mesh_renderer.volumes.mesh.children[0].material;
+		let material1 = mesh_face_material;
+		this.toggle_material = function(){
+			if(this.initial_mesh_renderer.volumes.mesh.children[0].material == material0)
+				change_volumes_material(this.initial_mesh_renderer, material1);
+			else
+				change_volumes_material(this.initial_mesh_renderer, material0);
+		}
+
+		this.toggle_material();
+
 		this.loop = function(){
 			if(this.running){
 				this.time += this.clock.getDelta();
 				this.group.setRotationFromAxisAngle(axis, Math.PI / 30 * this.time);
-				this.initial_mesh_renderer.volumes.mesh.children.forEach(
-					c => {c.getWorldPosition(v); if((v.x + v.z) > 0){
-						let scale = c.scale.x;
-						if(scale > 0){
-							scale -= 0.05;
-							c.scale.set(scale, scale, scale)
-						}
-					}
-					else{
-						let scale = c.scale.x;
-						if(scale < 0.95){
-							scale += 0.05;
-							c.scale.set(scale, scale, scale)
-						}
-					}
-				});
-				this.cactus_padding.volumes.mesh.children.forEach(
-					c => {c.getWorldPosition(v); if((0.5*v.x + v.z) > 0){
-						let scale = c.scale.x;
-						if(scale > 0){
-							scale -= 0.05;
-							c.scale.set(scale, scale, scale)
-						}
-					}
-					else{
-						let scale = c.scale.x;
-						if(scale < 0.85){
-							scale += 0.05;
-							c.scale.set(scale, scale, scale)
-						}
-					}
-				});
-				this.cactus_opt_mesh.volumes.mesh.children.forEach(
-					c => {c.getWorldPosition(v); if((v.x + v.z) > 0){
-						let scale = c.scale.x;
-						if(scale > 0){
-							scale -= 0.05;
-							c.scale.set(scale, scale, scale)
-						}
-					}
-					else{
-						let scale = c.scale.x;
-						if(scale < 0.95){
-							scale += 0.05;
-							c.scale.set(scale, scale, scale)
-						}
-					}
-				});
+				clip_volumes(this.initial_mesh_renderer, [[1, 0, 1]], 0, 0, 0.95);
+				clip_volumes(this.cactus_padding, [[1, 0, 1]], 0, 0, 0.85);
+				clip_volumes(this.cactus_opt_mesh, [[1, 0, 1]], 0, 0, 0.85);
 
 				this.camera.layers.enable(padding_layer);
 				main_renderer.setSize(DOM_padding.width, DOM_padding.height);
@@ -976,7 +995,13 @@ export let slide_metatron_comparison = new Slide(
 		this.clock = new Clock(true);
 		this.time = 0;
 		this.clipping = false;
-		this.toggle_clipping = function(){this.clipping = !this.clipping};
+		this.toggle_clipping = function(){
+			this.clipping = !this.clipping
+			if(!this.clipping){
+				this.metatron_renderer.volumes.rescale(0.85);
+				this.metatron_liv_renderer.volumes.rescale(0.85);
+			}
+		};
 		this.loop = function(){
 			if(this.running){
 				if(this.clipping){
@@ -998,6 +1023,146 @@ export let slide_metatron_comparison = new Slide(
 				context_ours.clearRect(0, 0, DOM_ours.width, DOM_ours.height);
 				context_ours.drawImage(main_renderer.domElement, 0, 0);
 				this.camera.layers.disable(our_layer);
+
+
+				requestAnimationFrame(this.loop.bind(this));
+			}
+		}
+	}
+);
+
+export let slide_fertility_result = new Slide(
+	function(DOM_fertility){
+		const base_layer = 0;
+
+		const context_fertility = DOM_fertility.getContext('2d');
+
+		this.camera = new THREE.PerspectiveCamera(75, DOM_fertility.width / DOM_fertility.height, 0.1, 1000.0);
+		this.camera.position.set(0, 0, 0.6);
+
+		const orbit_controls0  = new OrbitControls(this.camera, DOM_fertility);
+
+		this.scene = new THREE.Scene();
+		let ambiantLight = new THREE.AmbientLight(0xFFFFFF, ambiant_light_int);
+		let pointLight = new THREE.PointLight(0xFFFFFF, point_light_int);
+		pointLight.position.set(10,8,5);
+		ambiantLight.layers.enable(base_layer);
+		pointLight.layers.enable(base_layer);
+		this.scene.add(ambiantLight);
+		this.scene.add(pointLight);
+
+		this.group = new THREE.Group;
+		this.scene.add(this.group);
+
+		this.fertility_renderer = new Renderer(fertility_vol);
+		this.fertility_renderer.volumes.create({layer: base_layer, volume_colors: fertility_volume_colors}).add(this.group);
+		this.fertility_renderer.volumes.rescale(0.85);
+
+		const axis = new THREE.Vector3(0, 1, 0).normalize();
+		this.clock = new Clock(true);
+		this.time = 0;
+
+		let material0 = this.fertility_renderer.volumes.mesh.children[0].material;
+		let material1 = mesh_face_material;
+		this.toggle_material = function(){
+			if(this.fertility_renderer.volumes.mesh.children[0].material == material0)
+				change_volumes_material(this.fertility_renderer, material1);
+			else
+				change_volumes_material(this.fertility_renderer, material0);
+		}
+		this.toggle_material();
+
+		this.clipping = false;
+		this.toggle_clipping = function(){
+			this.clipping = !this.clipping
+			if(!this.clipping){
+				this.fertility_renderer.volumes.rescale(0.85);
+			}
+		};
+		this.loop = function(){
+			if(this.running){
+				if(this.clipping){
+					clip_volumes(this.fertility_renderer);
+				}
+				this.time += this.clock.getDelta();
+				this.group.setRotationFromAxisAngle(axis, Math.PI / 30 * this.time);
+
+				this.camera.layers.enable(base_layer);
+				main_renderer.setSize(DOM_fertility.width, DOM_fertility.height);
+				main_renderer.render(this.scene, this.camera);
+				context_fertility.clearRect(0, 0, DOM_fertility.width, DOM_fertility.height);
+				context_fertility.drawImage(main_renderer.domElement, 0, 0);
+				this.camera.layers.disable(base_layer);
+
+
+				requestAnimationFrame(this.loop.bind(this));
+			}
+		}
+	}
+);
+
+export let slide_dinopet_result = new Slide(
+	function(DOM_dinopet){
+		const base_layer = 0;
+
+		const context_dinopet = DOM_dinopet.getContext('2d');
+
+		this.camera = new THREE.PerspectiveCamera(75, DOM_dinopet.width / DOM_dinopet.height, 0.1, 1000.0);
+		this.camera.position.set(0, 0, 1.8);
+
+		const orbit_controls0  = new OrbitControls(this.camera, DOM_dinopet);
+
+		this.scene = new THREE.Scene();
+		let ambiantLight = new THREE.AmbientLight(0xFFFFFF, ambiant_light_int);
+		let pointLight = new THREE.PointLight(0xFFFFFF, point_light_int);
+		pointLight.position.set(10,8,5);
+		ambiantLight.layers.enable(base_layer);
+		pointLight.layers.enable(base_layer);
+		this.scene.add(ambiantLight);
+		this.scene.add(pointLight);
+
+		this.group = new THREE.Group;
+		this.scene.add(this.group);
+
+		this.dinopet_renderer = new Renderer(dinopet_vol);
+		this.dinopet_renderer.volumes.create({layer: base_layer, volume_colors: dinopet_volume_colors}).add(this.group);
+		this.dinopet_renderer.volumes.rescale(0.85);
+
+		const axis = new THREE.Vector3(0, 1, 0).normalize();
+		this.clock = new Clock(true);
+		this.time = 0;
+
+		let material0 = this.dinopet_renderer.volumes.mesh.children[0].material;
+		let material1 = mesh_face_material;
+		this.toggle_material = function(){
+			if(this.dinopet_renderer.volumes.mesh.children[0].material == material0)
+				change_volumes_material(this.dinopet_renderer, material1);
+			else
+				change_volumes_material(this.dinopet_renderer, material0);
+		}
+		this.toggle_material();
+
+		this.clipping = false;
+		this.toggle_clipping = function(){
+			this.clipping = !this.clipping
+			if(!this.clipping){
+				this.dinopet_renderer.volumes.rescale(0.85);
+			}
+		};
+		this.loop = function(){
+			if(this.running){
+				if(this.clipping){
+					clip_volumes(this.dinopet_renderer);
+				}
+				this.time += this.clock.getDelta();
+				this.group.setRotationFromAxisAngle(axis, Math.PI / 30 * this.time);
+
+				this.camera.layers.enable(base_layer);
+				main_renderer.setSize(DOM_dinopet.width, DOM_dinopet.height);
+				main_renderer.render(this.scene, this.camera);
+				context_dinopet.clearRect(0, 0, DOM_dinopet.width, DOM_dinopet.height);
+				context_dinopet.drawImage(main_renderer.domElement, 0, 0);
+				this.camera.layers.disable(base_layer);
 
 
 				requestAnimationFrame(this.loop.bind(this));
