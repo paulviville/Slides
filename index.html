@@ -30,30 +30,6 @@
 					</div>
 				</section>
 
-				<!-- <section id="Results_Horse"> 
-					Results
-					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
-					<div style="padding-right:2%">  
-						<canvas id="Result_Horse" width="400" height="400" ></canvas>
-						<p style="font-size:20px; margin-top: 0px;">SJ: min:0.449 - avg:0.912</p>
-						<div>Horse</div>
-					</div>
-					<div class="fragment" id="Results_Horse_material"></div>
-					<div class="fragment" id="Results_Horse_Clipping"></div>
-				</section> -->
-
-				<!-- <section id="Results_Cycles"> 
-					Results
-					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
-					<div style="padding-right:2%">  
-						<canvas id="Result_Cycles" width="400" height="400" ></canvas>
-						<p style="font-size:20px; margin-top: 0px;">SJ: min:0.316 - avg:0.937</p>
-						<div>Cycles</div>
-					</div>
-					<div class="fragment" id="Results_Cycles_material"></div>
-					<div class="fragment" id="Results_Cycles_Clipping"></div>
-				</section> -->
-
 				<section id="Overview"> 
 					Overview
 					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
@@ -125,10 +101,20 @@
 						</div>
 					</div>
 				</section>
-
-				<!-- <section id="Failure_Partition"> 
-					Connection Surfaces
+<!-- 
+				<section id="Results_Partition"> 
+					Sphere Partitions
 					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
+					<div class="r-hstack">
+						<div style="padding-right:2%">  
+							<canvas id="Partition14" width="340" height="340" ></canvas>
+							<p style="font-size:20px; margin-top: 0px;">14 Points<br>Success</p>
+						</div>
+						<div class="fragment">  
+							<canvas id="Partition_failure" width="340" height="340"></canvas>
+							<p style="font-size:20px; margin-top: 0px;">5 Points<br>Failure</p>
+						</div>
+					</div>
 				</section> -->
 
 				<section id="Flat_Partition"> 
@@ -230,6 +216,22 @@
 				<!-- <section id="Comparisions_Santa"> 
 					Comparisons
 					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
+					<div class="r-vstack">  
+						<div class="r-hstack">
+							<div style="padding-right:2%">  
+								<canvas id="Santa_live" width="340" height="340" ></canvas>
+								<p style="font-size:20px; margin-top: 0px;">(Livesu et al.,  2020)<br>SJ: min:0.682 - avg:0.941</p>
+							</div>
+							<div>  
+								<canvas id="Santa_ours" width="340" height="340"></canvas>
+								<p style="font-size:20px; margin-top: 0px;">Ours<br>SJ: min:0.820 - avg:0.981</p>
+							</div>
+						</div>
+						<div>
+							Santa
+						</div>
+					</div>
+					<div class="fragment" id="Santa_clipping"></div>
 				</section> -->
 
 				<section id="Comparisions_Metatron"> 
@@ -254,13 +256,28 @@
 				</section>
 
 				<!-- <section id="Edge_cases"> 
-					Comparisons
+					Edge Cases
 					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
-				</section> -->
-
-				<!-- <section id="Results_Horse"> 
-					Results
-					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
+					<div class="r-hstack">
+						<div style="padding-right:2%;">   
+							<canvas  id="Edge_Elephant" width="340" height="340"></canvas>
+							<p style="font-size: 30px;">Elephant</p>
+							<div class="fragment" id="Edge_Elephant_skel"></div>
+							<div class="fragment" id="Edge_Elephant_vol"></div>
+						</div>
+						<div class="fragment" style="padding-right:2%">  
+							<canvas id="Edge_rocker" width="340" height="340"></canvas>
+							<p style="font-size: 30px;">Rocker Arm</p>
+							<div class="fragment" id="Edge_rocker_skel"></div>
+							<div class="fragment" id="Edge_rocker_vol"></div>
+						</div>
+						<div class="fragment">  
+							<canvas id="Edge_meca" width="340" height="340"></canvas>
+							<p style="font-size: 30px;">Meca Piece</p>
+							<div class="fragment" id="Edge_meca_skel"></div>
+							<div class="fragment" id="Edge_meca_vol"></div>
+						</div>
+					</div>
 				</section> -->
 
 				<section id="Results_Dinopet"> 
@@ -275,6 +292,29 @@
 					<div class="fragment" id="Results_Dinopet_Clipping"></div>
 				</section>
 
+				<!-- <section id="Results_Horse"> 
+					Results
+					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
+					<div style="padding-right:2%">  
+						<canvas id="Result_Horse" width="400" height="400" ></canvas>
+						<p style="font-size:20px; margin-top: 0px;">SJ: min:0.449 - avg:0.912</p>
+						<div>Horse</div>
+					</div>
+					<div class="fragment" id="Results_Horse_material"></div>
+					<div class="fragment" id="Results_Horse_Clipping"></div>
+				</section> -->
+
+				<!-- <section id="Results_Cycles"> 
+					Results
+					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
+					<div style="padding-right:2%">  
+						<canvas id="Result_Cycles" width="400" height="400" ></canvas>
+						<p style="font-size:20px; margin-top: 0px;">SJ: min:0.316 - avg:0.937</p>
+						<div>Cycles</div>
+					</div>
+					<div class="fragment" id="Results_Cycles_material"></div>
+					<div class="fragment" id="Results_Cycles_Clipping"></div>
+				</section> -->
 
 				<section id="Results_Fertility"> 
 					Results
@@ -287,11 +327,6 @@
 					<div class="fragment" id="Results_Fertility_material"></div>
 					<div class="fragment" id="Results_Fertility_Clipping"></div>
 				</section>
-
-				<!-- <section id="Results_Cycles"> 
-					Results
-					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
-				</section> -->
 
 				<!-- <section> 
 					Acknowledgments

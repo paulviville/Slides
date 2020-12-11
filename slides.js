@@ -34,7 +34,7 @@ let mesh_face_alpha_material = new THREE.MeshLambertMaterial({
 
 let mesh_face_material = new THREE.MeshLambertMaterial({
 	color: mesh_face_color,
-	side: THREE.DoubleSide,
+	side: THREE.FrontSide,
 });
 
 let mesh_edge_material = new THREE.LineBasicMaterial({
