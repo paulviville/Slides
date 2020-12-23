@@ -10,7 +10,7 @@
 	</head>
 
 	<body>
-		
+		<div id="stats"></div>
 		<div class="reveal">
 			<div class="slides" id="slides">
 				<section id="Title" data-visibility="uncounted"> 
@@ -39,6 +39,7 @@
 						<canvas id="overview_output" width="350" height="400"></canvas>
 					</div>
 					<div class="fragment" id="Overview_clipping"></div>
+					<div class="fragment" id="Overview_pause"></div>
 				</section>
 
 				<!-- <section id="Introduction_0"> 
@@ -101,8 +102,8 @@
 						</div>
 					</div>
 				</section>
-<!-- 
-				<section id="Results_Partition"> 
+
+				<!-- <section id="Results_Partition"> 
 					Sphere Partitions
 					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
 					<div class="r-hstack">
@@ -255,31 +256,6 @@
 					<div class="fragment" id="Metatron_clipping"></div>
 				</section>
 
-				<!-- <section id="Edge_cases"> 
-					Edge Cases
-					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
-					<div class="r-hstack">
-						<div style="padding-right:2%;">   
-							<canvas  id="Edge_Elephant" width="340" height="340"></canvas>
-							<p style="font-size: 30px;">Elephant</p>
-							<div class="fragment" id="Edge_Elephant_skel"></div>
-							<div class="fragment" id="Edge_Elephant_vol"></div>
-						</div>
-						<div class="fragment" style="padding-right:2%">  
-							<canvas id="Edge_rocker" width="340" height="340"></canvas>
-							<p style="font-size: 30px;">Rocker Arm</p>
-							<div class="fragment" id="Edge_rocker_skel"></div>
-							<div class="fragment" id="Edge_rocker_vol"></div>
-						</div>
-						<div class="fragment">  
-							<canvas id="Edge_meca" width="340" height="340"></canvas>
-							<p style="font-size: 30px;">Meca Piece</p>
-							<div class="fragment" id="Edge_meca_skel"></div>
-							<div class="fragment" id="Edge_meca_vol"></div>
-						</div>
-					</div>
-				</section> -->
-
 				<section id="Results_Dinopet"> 
 					Results
 					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
@@ -328,6 +304,36 @@
 					<div class="fragment" id="Results_Fertility_Clipping"></div>
 				</section>
 
+				<!-- <section id="Edge_cases"> 
+					Edge Cases
+					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
+					<div class="r-hstack">
+						<div style="padding-right:2%;">   
+							<canvas  id="Edge_Elephant" width="340" height="340"></canvas>
+							<p style="font-size: 30px;">Elephant</p>
+							<div class="fragment" id="Edge_Elephant_skel"></div>
+							<div class="fragment" id="Edge_Elephant_vol"></div>
+						</div>
+						<div class="fragment" style="padding-right:2%">  
+							<canvas id="Edge_rocker" width="340" height="340"></canvas>
+							<p style="font-size: 30px;">Rocker Arm</p>
+							<div class="fragment" id="Edge_rocker_skel"></div>
+							<div class="fragment" id="Edge_rocker_vol"></div>
+						</div>
+						<div class="fragment">  
+							<canvas id="Edge_meca" width="340" height="340"></canvas>
+							<p style="font-size: 30px;">Meca Piece</p>
+							<div class="fragment" id="Edge_meca_skel"></div>
+							<div class="fragment" id="Edge_meca_vol"></div>
+						</div>
+					</div>
+				</section> -->
+
+				<!-- <section> 
+					Conclusion
+					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
+				</section> -->
+
 				<!-- <section> 
 					Acknowledgments
 					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
@@ -336,6 +342,7 @@
 		</div>
 
 		<script type="module">
+			import Stats from './CMapJS/Dependencies/stats.module.js'
 			import Reveal from './Reveal/reveal.esm.js'
 			import Slide from './Slide.js'
 			import Renderer from './CMapJS/Rendering/Renderer.js';
@@ -347,12 +354,13 @@
 			import {BoundingBox} from './CMapJS/Utils/BoundingBox.js';
 			import {
 				slide_overview,
-				slide_process_0, 
-				slide_process_1, 
-				slide_process_2,
 				slide_sphere_partition,
 				slide_flat_partition,
 				slide_ortho_partition,
+				slide_process_0, 
+				slide_process_1, 
+				slide_process_2,
+
 				slide_metatron_comparison,
 				slide_fertility_result,
 				slide_dinopet_result,
@@ -360,12 +368,13 @@
 
 			let slides = new Array();
 			slides["Overview"] = slide_overview;
-			slides["Pipeline_0"] = slide_process_0;
-			slides["Pipeline_1"] = slide_process_1;
-			slides["Pipeline_2"] = slide_process_2;
 			slides["Sphere_Partition"] = slide_sphere_partition;
 			slides["Flat_Partition"] = slide_flat_partition;
 			slides["Ortho_Partition"] = slide_ortho_partition;
+			slides["Pipeline_0"] = slide_process_0;
+			slides["Pipeline_1"] = slide_process_1;
+			slides["Pipeline_2"] = slide_process_2;
+
 			slides["Comparisions_Metatron"] = slide_metatron_comparison;
 			slides["Results_Fertility"] = slide_fertility_result;
 			slides["Results_Dinopet"] = slide_dinopet_result;
@@ -403,26 +412,8 @@
 				);
 				fragment_events["Overview_clipping"] = 
 					slides["Overview"].toggle_clipping.bind(slides["Overview"]);
-
-				slides["Pipeline_0"].init(
-					document.getElementById("Pipeline0_surface"),
-				 	document.getElementById("Pipeline0_skel"),
-					document.getElementById("Pipeline0_skel_simple")
-				);
-
-				slides["Pipeline_1"].init(
-					document.getElementById("Pipeline1_scaffold"),
-					document.getElementById("Pipeline1_initial_mesh"),
-					document.getElementById("Pipeline1_surface_fit_mesh")
-				);
-
-				slides["Pipeline_2"].init(
-					document.getElementById("Pipeline2_padding"),
-					document.getElementById("Pipeline2_result"),
-					document.getElementById("Pipeline2_quality")
-				);
-				fragment_events["Pipeline2_material"] = 
-					slides["Pipeline_2"].toggle_material.bind(slides["Pipeline_2"]);
+				fragment_events["Overview_pause"] = 
+					slides["Overview"].pause.bind(slides["Overview"]);
 
 				slides["Sphere_Partition"].init(
 					document.getElementById("SP_Points"),
@@ -443,6 +434,26 @@
 					document.getElementById("OP_4Points"),
 					document.getElementById("OP_5Points")
 				);
+
+				slides["Pipeline_0"].init(
+					document.getElementById("Pipeline0_surface"),
+				 	document.getElementById("Pipeline0_skel"),
+					document.getElementById("Pipeline0_skel_simple")
+				);
+
+				slides["Pipeline_1"].init(
+					document.getElementById("Pipeline1_scaffold"),
+					document.getElementById("Pipeline1_initial_mesh"),
+					document.getElementById("Pipeline1_surface_fit_mesh")
+				);
+
+				slides["Pipeline_2"].init(
+					document.getElementById("Pipeline2_padding"),
+					document.getElementById("Pipeline2_result"),
+					document.getElementById("Pipeline2_quality")
+				);
+				fragment_events["Pipeline2_material"] = 
+					slides["Pipeline_2"].toggle_material.bind(slides["Pipeline_2"]);
 
 				slides["Comparisions_Metatron"].init(
 					document.getElementById("Meta_live"),
@@ -468,6 +479,7 @@
 					slides["Results_Dinopet"].toggle_clipping.bind(slides["Results_Dinopet"]);
 			
 			});
+			
 			
 		</script>
 	</body>
