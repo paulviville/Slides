@@ -7,11 +7,14 @@ import {OrbitControls} from './CMapJS/Dependencies/OrbitsControls.js';
 import {load_graph} from './CMapJS/IO/Graph_Formats/Graph_IO.js'
 import {load_cmap2} from './CMapJS/IO/Surface_Formats/CMap2_IO.js'
 import {load_cmap3} from './CMapJS/IO/Volumes_Formats/CMap3_IO.js'
-import {fertility_off, fertility_scaffold_off, fertility_mesh, fertility_cg, fertility_simplified_cg} from './Files/fertility_files.js';
+import * as Fertility from './Files/fertility_files.js';
 import * as Vessels from './Files/vessels_files.js';
 import * as Cactus from './Files/cactus_files.js';
 import * as Metatron from './Files/metatron_files.js';
-import {dinopet_mesh} from './Files/dinopet_files.js';
+import * as Horse from './Files/horse_files.js';
+import * as Dinopet from './Files/dinopet_files.js';
+import * as Cycles from './Files/cycles_files.js';
+import * as Santa from './Files/santa_files.js';
 import {BoundingBox} from './CMapJS/Utils/BoundingBox.js';
 import compute_scaled_jacobian from './CMapJS/Modeling/Quality/Scaled_Jacobians.js';
 import {Clock} from './CMapJS/Dependencies/three.module.js';
@@ -50,8 +53,8 @@ let point_light_int = 0.6;
 // let cactus_scaffold = load_cmap2('off', cactus_scaffold_off);
 
 
-// let vessels_surface = load_cmap3("mesh", Vessels.vessels_mesh);
-// let bb = BoundingBox(fertility_skel.get_attribute(fertility_skel.vertex, "position"))
+// let vessels_surface = load_cmap3("mesh", Santa.santa_mesh);
+// let bb = BoundingBox(vessels_surface.get_attribute(vessels_surface.vertex, "position"))
 // console.log(bb)
 
 let stats = new Stats();
@@ -899,6 +902,81 @@ export let slide_metatron_comparison = new Slide(
 	}
 );
 
+export let slide_santa_comparison = new Slide(
+	function(DOM_livesu, DOM_ours){
+		const livesu_layer = 0;
+		const our_layer = 1;
+
+		const context_livesu = DOM_livesu.getContext('2d');
+		const context_ours = DOM_ours.getContext('2d');
+
+		this.camera = new THREE.PerspectiveCamera(75, DOM_livesu.width / DOM_livesu.height, 0.1, 1000.0);
+		this.camera.position.set(0, 0, 1);
+
+		const orbit_controls0  = new OrbitControls(this.camera, DOM_livesu);
+		const orbit_controls1  = new OrbitControls(this.camera, DOM_ours);
+
+		this.scene = new THREE.Scene();
+		let ambiantLight = new THREE.AmbientLight(0xFFFFFF, ambiant_light_int);
+		let pointLight = new THREE.PointLight(0xFFFFFF, point_light_int);
+		pointLight.position.set(10,8,15);
+		ambiantLight.layers.enable(livesu_layer);
+		pointLight.layers.enable(livesu_layer);
+		ambiantLight.layers.enable(our_layer);
+		pointLight.layers.enable(our_layer);
+		this.scene.add(ambiantLight);
+		this.scene.add(pointLight);
+
+		this.group = new THREE.Group;
+		this.scene.add(this.group);
+
+		this.santa_liv_vol = Display.load_volumes_view("mesh", Santa.santa_liv_mesh);
+		this.santa_liv_vol.layers.set(livesu_layer);
+		this.group.add(this.santa_liv_vol);
+
+		this.santa_vol = Display.load_volumes_view("mesh", Santa.santa_mesh);
+		this.santa_vol.layers.set(our_layer);
+		this.group.add(this.santa_vol);
+
+		this.santa_liv_vol.material.uniforms.min_clipping.value = -0.05;
+		this.santa_vol.material.uniforms.min_clipping.value = -0.05;
+
+		const axis = new THREE.Vector3(0, 1, 0).normalize();
+		this.clock = new Clock(true);
+		this.time = 0;
+		this.clipping = false;
+		this.toggle_clipping = function(){
+			this.santa_liv_vol.material.uniforms.quality.value = 1 - this.santa_liv_vol.material.uniforms.quality.value;
+			this.santa_vol.material.uniforms.quality.value = 1 - this.santa_vol.material.uniforms.quality.value;
+		};
+		this.loop = function(){
+			if(this.running){
+				stats.update();
+
+				this.time += this.clock.getDelta();
+				this.group.setRotationFromAxisAngle(axis, Math.PI / 180 * this.time);
+
+				this.camera.layers.enable(livesu_layer);
+				main_renderer.setSize(DOM_livesu.width, DOM_livesu.height);
+				main_renderer.render(this.scene, this.camera);
+				context_livesu.clearRect(0, 0, DOM_livesu.width, DOM_livesu.height);
+				context_livesu.drawImage(main_renderer.domElement, 0, 0);
+				this.camera.layers.disable(livesu_layer);
+
+				this.camera.layers.enable(our_layer);
+				main_renderer.render(this.scene, this.camera);
+				context_ours.clearRect(0, 0, DOM_ours.width, DOM_ours.height);
+				context_ours.drawImage(main_renderer.domElement, 0, 0);
+				this.camera.layers.disable(our_layer);
+
+
+				requestAnimationFrame(this.loop.bind(this));
+			}
+		}
+	}
+);
+
+
 export let slide_fertility_result = new Slide(
 	function(DOM_fertility){
 		const base_layer = 0;
@@ -922,8 +1000,11 @@ export let slide_fertility_result = new Slide(
 		this.group = new THREE.Group;
 		this.scene.add(this.group);
 
+		this.fertility_surface = Display.load_surface_view("off", Fertility.fertility_off, {color: 0xffffff, side: THREE.BackSide, transparent: true, opacity: 0.3});
+		this.fertility_surface.layers.set(base_layer);
+		this.group.add(this.fertility_surface);
 
-		this.fertility_vol = Display.load_volumes_view("mesh", fertility_mesh);
+		this.fertility_vol = Display.load_volumes_view("mesh", Fertility.fertility_mesh);
 		this.fertility_vol.layers.set(base_layer);
 		this.group.add(this.fertility_vol);
 
@@ -987,7 +1068,12 @@ export let slide_dinopet_result = new Slide(
 		this.group = new THREE.Group;
 		this.scene.add(this.group);
 
-		this.dinopet_vol = Display.load_volumes_view("mesh", dinopet_mesh);
+		this.dinopet_surface = Display.load_surface_view("off", Dinopet.dinopet_off, {color: 0xffffff, side: THREE.BackSide, transparent: true, opacity: 0.3});
+		this.dinopet_surface.layers.set(base_layer);
+		this.group.add(this.dinopet_surface);
+
+		
+		this.dinopet_vol = Display.load_volumes_view("mesh", Dinopet.dinopet_mesh);
 		this.dinopet_vol.layers.set(base_layer);
 		this.group.add(this.dinopet_vol);
 
@@ -1017,6 +1103,133 @@ export let slide_dinopet_result = new Slide(
 				context_dinopet.drawImage(main_renderer.domElement, 0, 0);
 				this.camera.layers.disable(base_layer);
 
+
+				requestAnimationFrame(this.loop.bind(this));
+			}
+		}
+	}
+);
+
+export let slide_horse_result = new Slide(
+	function(DOM_horse){
+		const base_layer = 0;
+
+		const context_horse = DOM_horse.getContext('2d');
+
+		this.camera = new THREE.PerspectiveCamera(75, DOM_horse.width / DOM_horse.height, 0.1, 1000.0);
+		this.camera.position.set(0, 0, 1);
+
+		const orbit_controls0  = new OrbitControls(this.camera, DOM_horse);
+
+		this.scene = new THREE.Scene();
+		let ambiantLight = new THREE.AmbientLight(0xFFFFFF, ambiant_light_int);
+		let pointLight = new THREE.PointLight(0xFFFFFF, point_light_int);
+		pointLight.position.set(10,8,15);
+		ambiantLight.layers.enable(base_layer);
+		pointLight.layers.enable(base_layer);
+		this.scene.add(ambiantLight);
+		this.scene.add(pointLight);
+
+		this.group = new THREE.Group;
+		this.scene.add(this.group);
+
+		this.horse_surface = Display.load_surface_view("off", Horse.horse_off, {color: 0xffffff, side: THREE.BackSide, transparent: true, opacity: 0.3});
+		this.horse_surface.layers.set(base_layer);
+		this.group.add(this.horse_surface);
+
+		this.horse_vol = Display.load_volumes_view("mesh", Horse.horse_mesh);
+		this.horse_vol.layers.set(base_layer);
+		this.group.add(this.horse_vol);
+
+		const axis = new THREE.Vector3(0, 1, 0).normalize();
+		this.clock = new Clock(true);
+		this.time = 0;
+
+		this.toggle_clipping = function(){
+			this.horse_vol.material.uniforms.clipping.value = 1 - this.horse_vol.material.uniforms.clipping.value;
+		}
+
+		this.clipping = false;
+		this.toggle_material = function(){
+			this.horse_vol.material.uniforms.quality.value = 1 - this.horse_vol.material.uniforms.quality.value;
+		};
+		this.loop = function(){
+			if(this.running){
+				stats.update();
+
+				this.time += this.clock.getDelta();
+				this.group.setRotationFromAxisAngle(axis,  Math.PI/2 + Math.PI / 30 * this.time);
+
+				this.camera.layers.enable(base_layer);
+				main_renderer.setSize(DOM_horse.width, DOM_horse.height);
+				main_renderer.render(this.scene, this.camera);
+				context_horse.clearRect(0, 0, DOM_horse.width, DOM_horse.height);
+				context_horse.drawImage(main_renderer.domElement, 0, 0);
+				this.camera.layers.disable(base_layer);
+
+
+				requestAnimationFrame(this.loop.bind(this));
+			}
+		}
+	}
+);
+
+export let slide_cycles_result = new Slide(
+	function(DOM_cycles){
+		const base_layer = 0;
+
+		const context_cycles = DOM_cycles.getContext('2d');
+
+		this.camera = new THREE.PerspectiveCamera(75, DOM_cycles.width / DOM_cycles.height, 0.1, 1000.0);
+		this.camera.position.set(0, 0, 6);
+
+		const orbit_controls0  = new OrbitControls(this.camera, DOM_cycles);
+
+		this.scene = new THREE.Scene();
+		let ambiantLight = new THREE.AmbientLight(0xFFFFFF, ambiant_light_int);
+		let pointLight = new THREE.PointLight(0xFFFFFF, point_light_int);
+		pointLight.position.set(10,8,15);
+		ambiantLight.layers.enable(base_layer);
+		pointLight.layers.enable(base_layer);
+		this.scene.add(ambiantLight);
+		this.scene.add(pointLight);
+
+		this.group = new THREE.Group;
+		this.scene.add(this.group);
+
+		this.cycles_surface = Display.load_surface_view("off", Cycles.cycles_off, {color: 0xffffff, side: THREE.BackSide, transparent: true, opacity: 0.3});
+		this.cycles_surface.layers.set(base_layer);
+		this.group.add(this.cycles_surface);
+
+		this.cycles_vol = Display.load_volumes_view("mesh", Cycles.cycles_mesh);
+		this.cycles_vol.layers.set(base_layer);
+		this.group.add(this.cycles_vol);
+
+		const axis = new THREE.Vector3(0, 1, 0).normalize();
+		this.clock = new Clock(true);
+		this.time = 0;
+
+		this.toggle_clipping = function(){
+			this.cycles_vol.material.uniforms.clipping.value = 1 - this.cycles_vol.material.uniforms.clipping.value;
+		}
+
+		this.clipping = false;
+		this.toggle_material = function(){
+			this.cycles_vol.material.uniforms.quality.value = 1 - this.cycles_vol.material.uniforms.quality.value;
+		};
+		this.loop = function(){
+			if(this.running){
+				stats.update();
+
+				this.time += this.clock.getDelta();
+				this.group.setRotationFromAxisAngle(axis,  Math.PI/2 + Math.PI / 30 * this.time);
+
+				this.camera.layers.enable(base_layer);
+				main_renderer.setSize(DOM_cycles.width, DOM_cycles.height);
+				main_renderer.render(this.scene, this.camera);
+				context_cycles.clearRect(0, 0, DOM_cycles.width, DOM_cycles.height);
+				context_cycles.drawImage(main_renderer.domElement, 0, 0);
+				this.camera.layers.disable(base_layer);
 
 				requestAnimationFrame(this.loop.bind(this));
 			}

@@ -5,8 +5,8 @@
 		<title>Slides</title>
 		<link rel="stylesheet" href="./multiCol.css">
 		<link rel="stylesheet" href="./Reveal/reveal.css">
-		<!-- <link rel="stylesheet" href="./Reveal/theme/black.css"> -->
-		<link rel="stylesheet" href="./Reveal/theme/solarized.css">
+		<link rel="stylesheet" href="./Reveal/theme/black.css">
+		<!-- <link rel="stylesheet" href="./Reveal/theme/solarized.css"> -->
 	</head>
 
 	<body>
@@ -87,7 +87,7 @@
 							</div>
 							<div class="fragment">  
 								<canvas id="SP_Remesh" width="200" height="166"></canvas>
-								<p style="font-size:18px; margin-top: 0px;">Delaunay<br>Remeshed</p>
+								<p style="font-size:18px; margin-top: 0px;">Vertices Degree 4<br>Remeshed</p>
 							</div>
 						</div>
 						<div class="r-hstack">
@@ -214,7 +214,7 @@
 					<div class="fragment" id="Pipeline2_material"></div>
 				</section>
 
-				<!-- <section id="Comparisions_Santa"> 
+				<section id="Comparisions_Santa"> 
 					Comparisons
 					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
 					<div class="r-vstack">  
@@ -233,7 +233,7 @@
 						</div>
 					</div>
 					<div class="fragment" id="Santa_clipping"></div>
-				</section> -->
+				</section>
 
 				<section id="Comparisions_Metatron"> 
 					Comparisons
@@ -268,29 +268,29 @@
 					<div class="fragment" id="Results_Dinopet_Clipping"></div>
 				</section>
 
-				<!-- <section id="Results_Horse"> 
+				<section id="Results_Horse"> 
 					Results
 					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
 					<div style="padding-right:2%">  
-						<canvas id="Result_Horse" width="400" height="400" ></canvas>
+						<canvas id="Result_Horse" width="500" height="400" ></canvas>
 						<p style="font-size:20px; margin-top: 0px;">SJ: min:0.449 - avg:0.912</p>
 						<div>Horse</div>
 					</div>
 					<div class="fragment" id="Results_Horse_material"></div>
 					<div class="fragment" id="Results_Horse_Clipping"></div>
-				</section> -->
+				</section>
 
-				<!-- <section id="Results_Cycles"> 
+				<section id="Results_Cycles"> 
 					Results
 					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
 					<div style="padding-right:2%">  
-						<canvas id="Result_Cycles" width="400" height="400" ></canvas>
+						<canvas id="Result_Cycles" width="500" height="400" ></canvas>
 						<p style="font-size:20px; margin-top: 0px;">SJ: min:0.316 - avg:0.937</p>
 						<div>Cycles</div>
 					</div>
 					<div class="fragment" id="Results_Cycles_material"></div>
 					<div class="fragment" id="Results_Cycles_Clipping"></div>
-				</section> -->
+				</section>
 
 				<section id="Results_Fertility"> 
 					Results
@@ -304,16 +304,10 @@
 					<div class="fragment" id="Results_Fertility_Clipping"></div>
 				</section>
 
-				<!-- <section id="Edge_cases"> 
+				<section id="Edge_cases"> 
 					Edge Cases
 					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
 					<div class="r-hstack">
-						<div style="padding-right:2%;">   
-							<canvas  id="Edge_Elephant" width="340" height="340"></canvas>
-							<p style="font-size: 30px;">Elephant</p>
-							<div class="fragment" id="Edge_Elephant_skel"></div>
-							<div class="fragment" id="Edge_Elephant_vol"></div>
-						</div>
 						<div class="fragment" style="padding-right:2%">  
 							<canvas id="Edge_rocker" width="340" height="340"></canvas>
 							<p style="font-size: 30px;">Rocker Arm</p>
@@ -327,7 +321,7 @@
 							<div class="fragment" id="Edge_meca_vol"></div>
 						</div>
 					</div>
-				</section> -->
+				</section>
 
 				<!-- <section> 
 					Conclusion
@@ -360,10 +354,12 @@
 				slide_process_0, 
 				slide_process_1, 
 				slide_process_2,
-
+				slide_santa_comparison,
 				slide_metatron_comparison,
 				slide_fertility_result,
 				slide_dinopet_result,
+				slide_horse_result,
+				slide_cycles_result,
 			} from './slides.js';
 
 			let slides = new Array();
@@ -374,10 +370,12 @@
 			slides["Pipeline_0"] = slide_process_0;
 			slides["Pipeline_1"] = slide_process_1;
 			slides["Pipeline_2"] = slide_process_2;
-
+			slides["Comparisions_Santa"] = slide_santa_comparison;
 			slides["Comparisions_Metatron"] = slide_metatron_comparison;
 			slides["Results_Fertility"] = slide_fertility_result;
+			slides["Results_Horse"] = slide_horse_result;
 			slides["Results_Dinopet"] = slide_dinopet_result;
+			slides["Results_Cycles"] = slide_cycles_result;
 			
 			let active_slide;
 			Reveal.addEventListener('slidechanged', function(event) {
@@ -455,6 +453,14 @@
 				fragment_events["Pipeline2_material"] = 
 					slides["Pipeline_2"].toggle_material.bind(slides["Pipeline_2"]);
 
+				slides["Comparisions_Santa"].init(
+				document.getElementById("Santa_live"),
+				document.getElementById("Santa_ours"),
+				);
+				fragment_events["Santa_clipping"] = 
+					slides["Comparisions_Santa"].toggle_clipping.bind(slides["Comparisions_Santa"]);
+			
+
 				slides["Comparisions_Metatron"].init(
 					document.getElementById("Meta_live"),
 					document.getElementById("Meta_ours"),
@@ -477,6 +483,22 @@
 					slides["Results_Dinopet"].toggle_material.bind(slides["Results_Dinopet"]);
 				fragment_events["Results_Dinopet_Clipping"] = 
 					slides["Results_Dinopet"].toggle_clipping.bind(slides["Results_Dinopet"]);
+			
+				slides["Results_Horse"].init(
+					document.getElementById("Result_Horse")
+				);
+				fragment_events["Results_Horse_material"] = 
+					slides["Results_Horse"].toggle_material.bind(slides["Results_Horse"]);
+				fragment_events["Results_Horse_Clipping"] = 
+					slides["Results_Horse"].toggle_clipping.bind(slides["Results_Horse"]);
+			
+				slides["Results_Cycles"].init(
+					document.getElementById("Result_Cycles")
+				);
+				fragment_events["Results_Cycles_material"] = 
+					slides["Results_Cycles"].toggle_material.bind(slides["Results_Cycles"]);
+				fragment_events["Results_Cycles_Clipping"] = 
+					slides["Results_Cycles"].toggle_clipping.bind(slides["Results_Cycles"]);
 			
 			});
 			

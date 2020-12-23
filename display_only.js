@@ -195,7 +195,7 @@ export function load_volumes_view(format, file_str, params = {}){
 			min_clipping: {value: -0.01},
 			max_clipping: {value: 0},
 			quality: {value: 0},
-			max_scale: {value: 0.98},
+			max_scale: {value: 0.90},
 			mesh_color: {value: mesh_color}
 		}
 	} );
