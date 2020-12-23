@@ -103,7 +103,7 @@
 					</div>
 				</section>
 
-				<!-- <section id="Results_Partition"> 
+				<section id="Results_Partition"> 
 					Sphere Partitions
 					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
 					<div class="r-hstack">
@@ -116,7 +116,7 @@
 							<p style="font-size:20px; margin-top: 0px;">5 Points<br>Failure</p>
 						</div>
 					</div>
-				</section> -->
+				</section>
 
 				<section id="Flat_Partition"> 
 					Flat Branching Points
@@ -202,6 +202,8 @@
 							<canvas  id="Pipeline2_padding" width="220" height="360"></canvas>
 							<p style="font-size: 30px;">Padded<br>Mesh</p>
 						</div>
+						<div class="fragment" id="Pipeline2_rotate"></div>
+						<div class="fragment" id="Pipeline2_rotate2"></div>
 						<div class="fragment" style="padding-right:2%">  
 							<canvas id="Pipeline2_result" width="220" height="360"></canvas>
 							<p style="font-size: 30px;">Subdivided<br>Mesh</p>
@@ -308,17 +310,19 @@
 					Edge Cases
 					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
 					<div class="r-hstack">
-						<div class="fragment" style="padding-right:2%">  
+						<div style="padding-right:2%">  
 							<canvas id="Edge_rocker" width="340" height="340"></canvas>
 							<p style="font-size: 30px;">Rocker Arm</p>
 							<div class="fragment" id="Edge_rocker_skel"></div>
 							<div class="fragment" id="Edge_rocker_vol"></div>
+							<div class="fragment" id="Edge_rocker_vol_clip"></div>
 						</div>
 						<div class="fragment">  
-							<canvas id="Edge_meca" width="340" height="340"></canvas>
-							<p style="font-size: 30px;">Meca Piece</p>
-							<div class="fragment" id="Edge_meca_skel"></div>
-							<div class="fragment" id="Edge_meca_vol"></div>
+							<canvas id="Edge_mech" width="340" height="340"></canvas>
+							<p style="font-size: 30px;">Mech Piece</p>
+							<div class="fragment" id="Edge_mech_skel"></div>
+							<div class="fragment" id="Edge_mech_vol"></div>
+							<div class="fragment" id="Edge_mech_vol_clip"></div>
 						</div>
 					</div>
 				</section>
@@ -330,6 +334,11 @@
 
 				<!-- <section> 
 					Acknowledgments
+					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
+				</section> -->
+
+				<!-- <section> 
+					Appendix
 					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
 				</section> -->
 			</div>
@@ -349,6 +358,7 @@
 			import {
 				slide_overview,
 				slide_sphere_partition,
+				slide_partition_results,
 				slide_flat_partition,
 				slide_ortho_partition,
 				slide_process_0, 
@@ -360,11 +370,13 @@
 				slide_dinopet_result,
 				slide_horse_result,
 				slide_cycles_result,
+				slide_edge_cases,
 			} from './slides.js';
 
 			let slides = new Array();
 			slides["Overview"] = slide_overview;
 			slides["Sphere_Partition"] = slide_sphere_partition;
+			slides["Results_Partition"] = slide_partition_results;
 			slides["Flat_Partition"] = slide_flat_partition;
 			slides["Ortho_Partition"] = slide_ortho_partition;
 			slides["Pipeline_0"] = slide_process_0;
@@ -376,6 +388,7 @@
 			slides["Results_Horse"] = slide_horse_result;
 			slides["Results_Dinopet"] = slide_dinopet_result;
 			slides["Results_Cycles"] = slide_cycles_result;
+			slides["Edge_cases"] = slide_edge_cases;
 			
 			let active_slide;
 			Reveal.addEventListener('slidechanged', function(event) {
@@ -388,12 +401,10 @@
 
 			let fragment_events = [];
 			Reveal.addEventListener('fragmentshown', function(event) {
-				console.log(event.fragment.id);
 				if(fragment_events[event.fragment.id])
 					fragment_events[event.fragment.id]();
 			});
 			Reveal.addEventListener('fragmenthidden', function(event) {
-				console.log(event.fragment.id);
 				if(fragment_events[event.fragment.id])
 					fragment_events[event.fragment.id]();
 			});
@@ -419,6 +430,15 @@
 					document.getElementById("SP_Remesh"),
 					document.getElementById("SP_Dual"),
 					document.getElementById("SP_Result")
+				);
+
+
+				
+
+
+				slides["Results_Partition"].init(
+					document.getElementById("Partition14"),
+					document.getElementById("Partition_failure")
 				);
 
 				slides["Flat_Partition"].init(
@@ -452,6 +472,10 @@
 				);
 				fragment_events["Pipeline2_material"] = 
 					slides["Pipeline_2"].toggle_material.bind(slides["Pipeline_2"]);
+				fragment_events["Pipeline2_rotate"] = 
+					slides["Pipeline_2"].toggle_rotate.bind(slides["Pipeline_2"]);
+				fragment_events["Pipeline2_rotate2"] = 
+					slides["Pipeline_2"].toggle_rotate.bind(slides["Pipeline_2"]);
 
 				slides["Comparisions_Santa"].init(
 				document.getElementById("Santa_live"),
@@ -460,7 +484,6 @@
 				fragment_events["Santa_clipping"] = 
 					slides["Comparisions_Santa"].toggle_clipping.bind(slides["Comparisions_Santa"]);
 			
-
 				slides["Comparisions_Metatron"].init(
 					document.getElementById("Meta_live"),
 					document.getElementById("Meta_ours"),
@@ -499,6 +522,25 @@
 					slides["Results_Cycles"].toggle_material.bind(slides["Results_Cycles"]);
 				fragment_events["Results_Cycles_Clipping"] = 
 					slides["Results_Cycles"].toggle_clipping.bind(slides["Results_Cycles"]);
+			
+
+				slides["Edge_cases"].init(
+					document.getElementById("Edge_rocker"),
+					document.getElementById("Edge_mech"),
+				);
+				fragment_events["Edge_rocker_skel"] = 
+					slides["Edge_cases"].toggle_rocker_skel.bind(slides["Edge_cases"]);
+				fragment_events["Edge_rocker_vol"] = 
+					slides["Edge_cases"].toggle_rocker_vol.bind(slides["Edge_cases"]);
+				fragment_events["Edge_rocker_vol_clip"] = 
+					slides["Edge_cases"].toggle_rocker_vol_clip.bind(slides["Edge_cases"]);
+			
+				fragment_events["Edge_mech_skel"] = 
+					slides["Edge_cases"].toggle_mech_skel.bind(slides["Edge_cases"]);
+				fragment_events["Edge_mech_vol"] = 
+					slides["Edge_cases"].toggle_mech_vol.bind(slides["Edge_cases"]);
+				fragment_events["Edge_mech_vol_clip"] = 
+					slides["Edge_cases"].toggle_mech_vol_clip.bind(slides["Edge_cases"]);
 			
 			});
 			

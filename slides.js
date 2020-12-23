@@ -15,6 +15,8 @@ import * as Horse from './Files/horse_files.js';
 import * as Dinopet from './Files/dinopet_files.js';
 import * as Cycles from './Files/cycles_files.js';
 import * as Santa from './Files/santa_files.js';
+import * as Rocker_arm from './Files/rocker_arm_files.js';
+import * as Mech_piece from './Files/mech_piece_files.js';
 import {BoundingBox} from './CMapJS/Utils/BoundingBox.js';
 import compute_scaled_jacobian from './CMapJS/Modeling/Quality/Scaled_Jacobians.js';
 import {Clock} from './CMapJS/Dependencies/three.module.js';
@@ -27,13 +29,7 @@ let main_renderer = new THREE.WebGLRenderer({
 	antialias: true,
 	alpha: true});
 
-let mesh_face_color = new THREE.Color(0x60c3f4);
 let mesh_edge_color = new THREE.Color(0x333333);
-
-let mesh_face_material = new THREE.MeshLambertMaterial({
-	color: mesh_face_color,
-	side: THREE.FrontSide,
-});
 
 let mesh_edge_material = new THREE.LineBasicMaterial({
 	color: mesh_edge_color,
@@ -45,17 +41,9 @@ let mesh_edge_material = new THREE.LineBasicMaterial({
 let ambiant_light_int = 0.4;
 let point_light_int = 0.6;
 
-// let cactus_padding = load_cmap3('mesh', cactus_padding_mesh);
-// let cactus_subdivided = load_cmap3('mesh', cactus_subdivided_mesh);
-// let cactus_opt_mesh = load_cmap3('mesh', cactus_mesh);
-// let cactus_skel = load_graph('cg', cactus_cg);
-// let cactus_skel_simple = load_graph('cg', cactus_simplified_cg);
-// let cactus_scaffold = load_cmap2('off', cactus_scaffold_off);
-
-
-// let vessels_surface = load_cmap3("mesh", Santa.santa_mesh);
-// let bb = BoundingBox(vessels_surface.get_attribute(vessels_surface.vertex, "position"))
-// console.log(bb)
+let vessels_surface = load_graph("cg", Mech_piece.mech_piece_cg);
+let bb = BoundingBox(vessels_surface.get_attribute(vessels_surface.vertex, "position"))
+console.log(bb)
 
 let stats = new Stats();
 document.body.appendChild(stats.dom);
@@ -123,7 +111,7 @@ export let slide_overview = new Slide(
 				stats.update();
 
 				this.time += this.clock.getDelta() * this.on;
-				this.group.setRotationFromAxisAngle(axis, Math.PI / 30 * this.time);
+				this.group.setRotationFromAxisAngle(axis, Math.PI / 45 * this.time);
 
 				this.vessels_surface.material.opacity = 0.8;
 				this.vessels_surface.material.side = THREE.FrontSide;
@@ -206,7 +194,7 @@ export let slide_process_0 = new Slide(
 			if(this.running){
 				stats.update();
 				this.time += this.clock.getDelta();
-				this.group.setRotationFromAxisAngle(axis, Math.PI / 30 * this.time);
+				this.group.setRotationFromAxisAngle(axis, Math.PI / 45 * this.time);
 
 				this.cactus_surface.material.opacity = 1;
 				main_renderer.setSize(DOM_surface.width, DOM_surface.height);
@@ -297,7 +285,7 @@ export let slide_process_1 = new Slide(
 			if(this.running){
 				stats.update();
 				this.time += this.clock.getDelta();
-				this.group.setRotationFromAxisAngle(axis, Math.PI / 30 * this.time);
+				this.group.setRotationFromAxisAngle(axis, Math.PI / 45 * this.time);
 
 				this.camera.layers.enable(base_layer);
 				this.camera.layers.enable(scaffold_layer);
@@ -382,9 +370,16 @@ export let slide_process_2 = new Slide(
 
 
 		const axis = new THREE.Vector3(0, 1, 0);
+		const axisX = new THREE.Vector3(1, 0, 0);
 		this.clock = new Clock(true);
 		this.time = 0;
-
+		this.rotate = Math.PI / 2;
+		this.toggle_rotate = function(){
+			this.cactus_padding_vol.setRotationFromAxisAngle(axisX, this.rotate);
+			this.cactus_surface.setRotationFromAxisAngle(axisX, this.rotate);
+			this.rotate = this.rotate != 0 ? 0 : Math.PI / 2;
+		}
+		
 		this.toggle_material = function(){
 			this.cactus_result_vol.material.uniforms.quality.value = 1 - this.cactus_result_vol.material.uniforms.quality.value;
 		}
@@ -393,7 +388,7 @@ export let slide_process_2 = new Slide(
 			if(this.running){
 				stats.update();
 				this.time += this.clock.getDelta();
-				this.group.setRotationFromAxisAngle(axis, Math.PI / 30 * this.time);
+				this.group.setRotationFromAxisAngle(axis, Math.PI / 45 * this.time);
 
 				this.camera.layers.enable(padding_layer);
 				main_renderer.setSize(DOM_padding.width, DOM_padding.height);
@@ -533,6 +528,107 @@ export let slide_sphere_partition = new Slide(
 
 	}
 );
+
+export let slide_partition_results = new Slide(
+	function(DOM_14points, DOM_fail){
+		const base_layer = 0;
+		const points14_layer = 1;
+		const fail_layer = 2;
+
+		const context_points3 = DOM_14points.getContext('2d');
+		const context_points4 = DOM_fail.getContext('2d');
+
+		this.camera0 = new THREE.PerspectiveCamera(75, DOM_14points.width / DOM_14points.height, 0.1, 1000.0);
+		this.camera0.position.set(0, 0, 1.8);
+		this.camera1 = new THREE.PerspectiveCamera(75, DOM_14points.width / DOM_14points.height, 0.1, 1000.0);
+		this.camera1.position.set(0, 0, 1.8);
+
+		this.camera0.layers.enable(base_layer);
+		this.camera0.layers.enable(points14_layer);
+		this.camera1.layers.enable(base_layer);
+		this.camera1.layers.enable(fail_layer);
+
+		const orbit_controls0  = new OrbitControls(this.camera0, DOM_14points);
+		const orbit_controls1  = new OrbitControls(this.camera1, DOM_fail);
+
+		this.scene = new THREE.Scene();
+		let ambiantLight = new THREE.AmbientLight(0xFFFFFF, ambiant_light_int);
+		let pointLight = new THREE.PointLight(0xFFFFFF, point_light_int);
+		pointLight.position.set(10,8,15);
+		this.scene.add(ambiantLight);
+		this.scene.add(pointLight);
+
+		this.group = new THREE.Group;
+		this.scene.add(this.group);
+
+		let sphere =  new THREE.Mesh(sphere_geom, sphere_mat);
+		sphere.layers.set(base_layer);
+		this.group.add(sphere);
+
+		let points14_graph = load_graph('cg', SP.partition_14_cg);
+		this.points14_graph_renderer = new Renderer(points14_graph);
+		this.points14_graph_renderer.edges.create({layer: points14_layer, material: mesh_edge_material}).add(this.group);
+
+		let points14 = new THREE.Group;
+		this.group.add(points14);
+		let points_pos = points14_graph.get_attribute(points14_graph.vertex, "position");
+		points14_graph.foreach(points14_graph.vertex, vd => {
+			let point = new THREE.Mesh(point_geom, point_mat);
+			point.position.copy(points_pos[points14_graph.cell(points14_graph.vertex, vd)]);
+			point.layers.set(points14_layer);
+			points14.add(point);
+		});
+
+		let fail_graph = load_graph('cg', SP.partition_fail_cg);
+		let fail_graph_renderer = new Renderer(fail_graph);
+		fail_graph_renderer.edges.create({layer: fail_layer, material: mesh_edge_material}).add(this.group);
+
+		let points_fail = new THREE.Group;
+		this.group.add(points_fail);
+		points_pos = fail_graph.get_attribute(fail_graph.vertex, "position");
+		fail_graph.foreach(fail_graph.vertex, vd => {
+			let point = new THREE.Mesh(point_geom, point_mat);
+			point.position.copy(points_pos[fail_graph.cell(fail_graph.vertex, vd)]);
+			point.layers.set(fail_layer);
+			points_fail.add(point);
+		});
+
+
+		let points14_surface = load_cmap2('off', SP.partition_14_off);
+		let points14_surface_renderer = new Renderer_Spherical(points14_surface);
+		points14_surface_renderer.geodesics.create({layer: points14_layer, color: 0xFF2222}).add(this.group);
+		points14_surface_renderer.vertices.create({size: 0.06125, layer: points14_layer, color: 0xFF2222}).add(this.group);
+
+		let fail_surface = load_cmap2('off', SP.partition_fail_off);
+		let fail_surface_renderer = new Renderer_Spherical(fail_surface);
+		fail_surface_renderer.geodesics.create({layer: fail_layer, color: 0xFF2222}).add(this.group);
+		fail_surface_renderer.vertices.create({size: 0.06125, layer: fail_layer, color: 0xFF2222}).add(this.group);
+
+		const axis = new THREE.Vector3(0, 1, 0);
+		this.clock = new Clock(true);
+		this.time = 0;
+		this.loop = function(){
+			if(this.running){
+				stats.update();
+				this.time += this.clock.getDelta();
+				this.group.setRotationFromAxisAngle(axis, Math.PI / 60 * this.time);
+
+				main_renderer.setSize(DOM_14points.width, DOM_14points.height);
+				main_renderer.render(this.scene, this.camera0);
+				context_points3.clearRect(0, 0, DOM_14points.width, DOM_14points.height);
+				context_points3.drawImage(main_renderer.domElement, 0, 0);
+
+				main_renderer.render(this.scene, this.camera1);
+				context_points4.clearRect(0, 0, DOM_fail.width, DOM_fail.height);
+				context_points4.drawImage(main_renderer.domElement, 0, 0);
+
+				requestAnimationFrame(this.loop.bind(this));
+			}
+		}
+
+	}
+);
+
 
 export let slide_flat_partition = new Slide(
 	function(DOM_3points, DOM_4points, DOM_5points){
@@ -827,7 +923,6 @@ export let slide_ortho_partition = new Slide(
 	}
 );
 
-
 export let slide_metatron_comparison = new Slide(
 	function(DOM_livesu, DOM_ours){
 		const livesu_layer = 0;
@@ -880,7 +975,7 @@ export let slide_metatron_comparison = new Slide(
 				stats.update();
 
 				this.time += this.clock.getDelta();
-				this.group.setRotationFromAxisAngle(axis, Math.PI / 30 * this.time);
+				this.group.setRotationFromAxisAngle(axis, Math.PI / 45 * this.time);
 
 				this.camera.layers.enable(livesu_layer);
 				main_renderer.setSize(DOM_livesu.width, DOM_livesu.height);
@@ -976,7 +1071,6 @@ export let slide_santa_comparison = new Slide(
 	}
 );
 
-
 export let slide_fertility_result = new Slide(
 	function(DOM_fertility){
 		const base_layer = 0;
@@ -1029,7 +1123,7 @@ export let slide_fertility_result = new Slide(
 					clip_volumes(this.fertility_renderer);
 				}
 				this.time += this.clock.getDelta();
-				this.group.setRotationFromAxisAngle(axis, Math.PI / 30 * this.time);
+				this.group.setRotationFromAxisAngle(axis, Math.PI / 45 * this.time);
 
 				this.camera.layers.enable(base_layer);
 				main_renderer.setSize(DOM_fertility.width, DOM_fertility.height);
@@ -1094,7 +1188,7 @@ export let slide_dinopet_result = new Slide(
 				stats.update();
 
 				this.time += this.clock.getDelta();
-				this.group.setRotationFromAxisAngle(axis, Math.PI / 30 * this.time);
+				this.group.setRotationFromAxisAngle(axis, Math.PI / 45 * this.time);
 
 				this.camera.layers.enable(base_layer);
 				main_renderer.setSize(DOM_dinopet.width, DOM_dinopet.height);
@@ -1158,7 +1252,7 @@ export let slide_horse_result = new Slide(
 				stats.update();
 
 				this.time += this.clock.getDelta();
-				this.group.setRotationFromAxisAngle(axis,  Math.PI/2 + Math.PI / 30 * this.time);
+				this.group.setRotationFromAxisAngle(axis,  Math.PI/2 + Math.PI / 45 * this.time);
 
 				this.camera.layers.enable(base_layer);
 				main_renderer.setSize(DOM_horse.width, DOM_horse.height);
@@ -1222,7 +1316,7 @@ export let slide_cycles_result = new Slide(
 				stats.update();
 
 				this.time += this.clock.getDelta();
-				this.group.setRotationFromAxisAngle(axis,  Math.PI/2 + Math.PI / 30 * this.time);
+				this.group.setRotationFromAxisAngle(axis,  Math.PI/2 + Math.PI / 45 * this.time);
 
 				this.camera.layers.enable(base_layer);
 				main_renderer.setSize(DOM_cycles.width, DOM_cycles.height);
@@ -1230,6 +1324,125 @@ export let slide_cycles_result = new Slide(
 				context_cycles.clearRect(0, 0, DOM_cycles.width, DOM_cycles.height);
 				context_cycles.drawImage(main_renderer.domElement, 0, 0);
 				this.camera.layers.disable(base_layer);
+
+				requestAnimationFrame(this.loop.bind(this));
+			}
+		}
+	}
+);
+
+export let slide_edge_cases = new Slide(
+	function(DOM_rocker, DOM_mech){
+		const rocker_layer = 0;
+		const mech_layer = 1;
+
+		const context_rocker = DOM_rocker.getContext('2d');
+		const context_mech = DOM_mech.getContext('2d');
+
+		this.camera0 = new THREE.PerspectiveCamera(75, DOM_rocker.width / DOM_rocker.height, 0.1, 1000.0);
+		this.camera0.position.set(0, 0, 2.5);
+
+		this.camera1 = new THREE.PerspectiveCamera(75, DOM_rocker.width / DOM_rocker.height, 0.1, 1000.0);
+		this.camera1.position.set(0, 0, 2);
+		this.camera1.layers.enable(mech_layer);
+		this.camera1.layers.disable(rocker_layer);
+
+		const orbit_controls0  = new OrbitControls(this.camera0, DOM_rocker);
+		const orbit_controls1  = new OrbitControls(this.camera1, DOM_mech);
+
+		this.scene = new THREE.Scene();
+		let ambiantLight = new THREE.AmbientLight(0xFFFFFF, ambiant_light_int);
+		let pointLight = new THREE.PointLight(0xFFFFFF, point_light_int);
+		pointLight.position.set(10,8,15);
+		ambiantLight.layers.enable(rocker_layer);
+		pointLight.layers.enable(rocker_layer);
+		ambiantLight.layers.enable(mech_layer);
+		pointLight.layers.enable(mech_layer);
+		this.scene.add(ambiantLight);
+		this.scene.add(pointLight);
+
+		this.group = new THREE.Group;
+		this.scene.add(this.group);
+
+		this.rocker_surface = Display.load_surface_view("off", Rocker_arm.rocker_arm_off, {transparent: true, opacity: 0.3});
+		this.rocker_surface.layers.set(rocker_layer);
+		this.group.add(this.rocker_surface);
+
+		let rocker_skel = load_graph('cg', Rocker_arm.rocker_arm_cg);
+		this.rocker_skel = new Renderer(rocker_skel);
+		this.rocker_skel.edges.create({layer: rocker_layer, material: mesh_edge_material}).add(this.group);
+		this.rocker_skel.edges.mesh.visible = false;
+
+		this.rocker_vol = Display.load_volumes_view("mesh", Rocker_arm.rocker_arm_mesh);
+		this.rocker_vol.layers.set(rocker_layer);
+		this.rocker_vol.visible = false;
+		this.group.add(this.rocker_vol);
+
+		this.mech_surface = Display.load_surface_view("off", Mech_piece.mech_piece_off, {transparent: true, opacity: 0.3});
+		this.mech_surface.layers.set(mech_layer);
+		this.group.add(this.mech_surface);
+
+		this.mech_vol = Display.load_volumes_view("mesh", Mech_piece.mech_piece_mesh);
+		this.mech_vol.layers.set(mech_layer);
+		this.group.add(this.mech_vol);
+		this.mech_vol.visible = false;
+
+		let mech_skel = load_graph("cg", Mech_piece.mech_piece_cg);
+		this.mech_skel = new Renderer(mech_skel);
+		this.mech_skel.edges.create({layer: mech_layer, material: mesh_edge_material}).add(this.group);
+		this.mech_skel.edges.mesh.visible = false;
+
+		const axis = new THREE.Vector3(0, 1, 0).normalize();
+		this.clock = new Clock(true);
+		this.time = 0;
+
+		this.toggle_rocker_skel = function(){
+			this.rocker_skel.edges.mesh.visible = !this.rocker_skel.edges.mesh.visible;
+		}
+
+		this.toggle_mech_skel = function(){
+			this.mech_skel.edges.mesh.visible = !this.mech_skel.edges.mesh.visible;
+		}
+
+		this.toggle_rocker_vol = function(){
+			this.rocker_vol.visible = !this.rocker_vol.visible;
+			this.rocker_surface.material.side = 
+				this.rocker_surface.material.side == THREE.BackSide ?
+					THREE.FrontSide : THREE.BackSide;
+		}
+
+		this.toggle_mech_vol = function(){
+			this.mech_vol.visible = !this.mech_vol.visible;
+			this.mech_surface.material.side = 
+				this.mech_surface.material.side == THREE.BackSide ?
+					THREE.FrontSide : THREE.BackSide;
+		}
+
+		this.toggle_mech_vol_clip = function(){
+			this.mech_vol.material.uniforms.clipping.value = 1 - this.mech_vol.material.uniforms.clipping.value;
+			this.mech_vol.material.uniforms.quality.value = 1 - this.mech_vol.material.uniforms.quality.value;
+		}
+
+		this.toggle_rocker_vol_clip = function(){
+			this.rocker_vol.material.uniforms.clipping.value = 1 - this.rocker_vol.material.uniforms.clipping.value;
+			this.rocker_vol.material.uniforms.quality.value = 1 - this.rocker_vol.material.uniforms.quality.value;
+		}
+
+		this.loop = function(){
+			if(this.running){
+				stats.update();
+
+				this.time += this.clock.getDelta();
+				this.group.setRotationFromAxisAngle(axis, Math.PI / 180 * this.time);
+
+				main_renderer.setSize(DOM_rocker.width, DOM_rocker.height);
+				main_renderer.render(this.scene, this.camera0);
+				context_rocker.clearRect(0, 0, DOM_rocker.width, DOM_rocker.height);
+				context_rocker.drawImage(main_renderer.domElement, 0, 0);
+
+				main_renderer.render(this.scene, this.camera1);
+				context_mech.clearRect(0, 0, DOM_mech.width, DOM_mech.height);
+				context_mech.drawImage(main_renderer.domElement, 0, 0);
 
 				requestAnimationFrame(this.loop.bind(this));
 			}
