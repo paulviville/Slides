@@ -49,6 +49,62 @@ let stats = new Stats();
 document.body.appendChild(stats.dom);
 
 
+const cylinder_geometry = new THREE.CylinderGeometry(0.0125, 0.0125, 1, 20);
+const cylinder_material = new THREE.MeshBasicMaterial({
+	color: mesh_edge_color,
+});
+const point_geom = new THREE.SphereGeometry( 0.035, 16, 16 );
+const point_mat = new THREE.MeshLambertMaterial({color: 0xFF0000});
+
+
+function create_branching_point(graph, layer = 0){
+	const vertex = graph.vertex;
+	const edge = graph.edge;
+	const position = graph.get_attribute(vertex, "position");
+
+	const branching_point = new THREE.Group;
+	const edges = new THREE.Group;
+	graph.foreach(edge, ed => {
+		console.log("edge: " + ed, position[graph.cell(vertex, ed)], position[graph.cell(vertex, graph.phi1[ed])])
+		let cylinder = new THREE.Mesh(cylinder_geometry, cylinder_material);
+		cylinder.layers.set(layer);
+		let p0 = position[graph.cell(vertex, ed)].clone().multiplyScalar(1.2);
+		let p1 = position[graph.cell(vertex, graph.phi1[ed])].clone().multiplyScalar(1.2);
+		let dir = new THREE.Vector3().subVectors(p0, p1);
+
+		let len = dir.length();
+		let mid = new THREE.Vector3().addVectors(p0, p1).divideScalar(2);
+
+		let dirx = new THREE.Vector3().crossVectors(dir.normalize(), new THREE.Vector3(-0.01,0.01,1).normalize());
+		console.log(dirx);
+		let dirz = new THREE.Vector3().crossVectors(dirx, dir);
+		console.log(dirz);
+
+		let m = new THREE.Matrix4().fromArray([
+			dirx.x, dir.x, dirz.x, mid.x,
+			dirx.y, dir.y, dirz.y, mid.y,
+			dirx.z, dir.z, dirz.z, mid.z,
+			0, 0, 0, 1]).transpose();
+		cylinder.applyMatrix4(m);
+		console.log(cylinder.rotation)
+		cylinder.scale.set(1, len, 1);
+		edges.add(cylinder);
+	});
+
+	const points = new THREE.Group;
+	graph.foreach(graph.vertex, vd => {
+		const point = new THREE.Mesh(point_geom, point_mat);
+		point.position.copy(position[graph.cell(vertex, vd)]);
+		point.layers.set(layer);
+		points.add(point);
+	});
+
+	branching_point.add(points);
+	branching_point.add(edges);
+	console.log(branching_point)
+	return branching_point;
+}
+
 export let slide_overview = new Slide(
 	function(DOM_input, DOM_output)
 	{
@@ -417,9 +473,6 @@ export let slide_process_2 = new Slide(
 
 let sphere_mat = new THREE.MeshLambertMaterial({color: 0xEEEEEE, transparent: true, opacity: 0.850});
 let sphere_geom = new THREE.SphereGeometry( 0.995, 64, 64 );
-let point_geom = new THREE.SphereGeometry( 0.035, 16, 16 );
-let point_mat = new THREE.MeshLambertMaterial({color: 0xFF0000});
-
 
 export let slide_sphere_partition = new Slide(
 	function(DOM_points, DOM_raw, DOM_remesh, DOM_dual, DOM_result){
@@ -462,15 +515,8 @@ export let slide_sphere_partition = new Slide(
 		let sphere =  new THREE.Mesh(sphere_geom, sphere_mat);
 		this.group.add(sphere);
 
-		let points = new THREE.Group;
+		let points = create_branching_point(sphere_graph, points_layer);
 		this.group.add(points);
-		let points_pos = sphere_graph.get_attribute(sphere_graph.vertex, "position");
-		sphere_graph.foreach(sphere_graph.vertex, vd => {
-			let point = new THREE.Mesh(point_geom, point_mat);
-			point.position.copy(points_pos[sphere_graph.cell(sphere_graph.vertex, vd)]);
-			point.layers.set(points_layer);
-			points.add(point);
-		})
 
 		let branching_point_renderer = new Renderer(sphere_graph);
 		branching_point_renderer.edges.create({layer: points_layer, material: mesh_edge_material}).add(this.group);
@@ -566,33 +612,12 @@ export let slide_partition_results = new Slide(
 		this.group.add(sphere);
 
 		let points14_graph = load_graph('cg', SP.partition_14_cg);
-		this.points14_graph_renderer = new Renderer(points14_graph);
-		this.points14_graph_renderer.edges.create({layer: points14_layer, material: mesh_edge_material}).add(this.group);
-
-		let points14 = new THREE.Group;
+		let points14 = create_branching_point(points14_graph, points14_layer);
 		this.group.add(points14);
-		let points_pos = points14_graph.get_attribute(points14_graph.vertex, "position");
-		points14_graph.foreach(points14_graph.vertex, vd => {
-			let point = new THREE.Mesh(point_geom, point_mat);
-			point.position.copy(points_pos[points14_graph.cell(points14_graph.vertex, vd)]);
-			point.layers.set(points14_layer);
-			points14.add(point);
-		});
 
 		let fail_graph = load_graph('cg', SP.partition_fail_cg);
-		let fail_graph_renderer = new Renderer(fail_graph);
-		fail_graph_renderer.edges.create({layer: fail_layer, material: mesh_edge_material}).add(this.group);
-
-		let points_fail = new THREE.Group;
+		let points_fail = create_branching_point(fail_graph, fail_layer);;
 		this.group.add(points_fail);
-		points_pos = fail_graph.get_attribute(fail_graph.vertex, "position");
-		fail_graph.foreach(fail_graph.vertex, vd => {
-			let point = new THREE.Mesh(point_geom, point_mat);
-			point.position.copy(points_pos[fail_graph.cell(fail_graph.vertex, vd)]);
-			point.layers.set(fail_layer);
-			points_fail.add(point);
-		});
-
 
 		let points14_surface = load_cmap2('off', SP.partition_14_off);
 		let points14_surface_renderer = new Renderer_Spherical(points14_surface);
@@ -663,46 +688,17 @@ export let slide_flat_partition = new Slide(
 		this.group.add(sphere);
 
 		let flat_3_graph = load_graph('cg', SP.flat_3_cg);
-		let flat3_graph_renderer = new Renderer(flat_3_graph);
-		flat3_graph_renderer.edges.create({layer: points3_layer, material: mesh_edge_material}).add(this.group);
-
-		let points3 = new THREE.Group;
+		let points3 = create_branching_point(flat_3_graph, points3_layer);
 		this.group.add(points3);
-		let points_pos = flat_3_graph.get_attribute(flat_3_graph.vertex, "position");
-		flat_3_graph.foreach(flat_3_graph.vertex, vd => {
-			let point = new THREE.Mesh(point_geom, point_mat);
-			point.position.copy(points_pos[flat_3_graph.cell(flat_3_graph.vertex, vd)]);
-			point.layers.set(points3_layer);
-			points3.add(point);
-		});
+
 
 		let flat_4_graph = load_graph('cg', SP.flat_4_cg);
-		let flat4_graph_renderer = new Renderer(flat_4_graph);
-		flat4_graph_renderer.edges.create({layer: points4_layer, material: mesh_edge_material}).add(this.group);
-
-		let points4 = new THREE.Group;
+		let points4 = create_branching_point(flat_4_graph, points4_layer);
 		this.group.add(points4);
-		points_pos = flat_4_graph.get_attribute(flat_4_graph.vertex, "position");
-		flat_4_graph.foreach(flat_4_graph.vertex, vd => {
-			let point = new THREE.Mesh(point_geom, point_mat);
-			point.position.copy(points_pos[flat_4_graph.cell(flat_4_graph.vertex, vd)]);
-			point.layers.set(points4_layer);
-			points4.add(point);
-		});
 
 		let flat_5_graph = load_graph('cg', SP.flat_5_cg);
-		let flat5_graph_renderer = new Renderer(flat_5_graph);
-		flat5_graph_renderer.edges.create({layer: points5_layer, material: mesh_edge_material}).add(this.group);
-
-		let points5 = new THREE.Group;
+		let points5 = create_branching_point(flat_5_graph, points5_layer);
 		this.group.add(points5);
-		points_pos = flat_5_graph.get_attribute(flat_5_graph.vertex, "position");
-		flat_5_graph.foreach(flat_5_graph.vertex, vd => {
-			let point = new THREE.Mesh(point_geom, point_mat);
-			point.position.copy(points_pos[flat_5_graph.cell(flat_5_graph.vertex, vd)]);
-			point.layers.set(points5_layer);
-			points5.add(point);
-		});
 
 		let flat_3_surface = load_cmap2('off', SP.flat_3_off);
 		let flat3_surface_renderer = new Renderer_Spherical(flat_3_surface);
@@ -832,17 +828,10 @@ export let slide_ortho_partition = new Slide(
 		ortho3_surface_renderer.vertices.create({size: 0.06125, layer: points3_layer, color: 0xFF2222}).add(this.group);
 
 		let ortho_3_graph = load_graph('cg', SP.ortho_3_cg);
-		let ortho3_graph_renderer = new Renderer(ortho_3_graph);
-		ortho3_graph_renderer.edges.create({layer: points3_layer, material: mesh_edge_material}).add(this.group);
-
-		let points_pos = ortho_3_graph.get_attribute(ortho_3_graph.vertex, "position");
-		let points3 = new THREE.Group;
+		let points3 = create_branching_point(ortho_3_graph, points3_layer);
 		this.group.add(points3);
-		ortho_3_graph.foreach(ortho_3_graph.vertex, vd => {
-			let point = new THREE.Mesh(point_geom, point_mat);
-			point.position.copy(points_pos[ortho_3_graph.cell(ortho_3_graph.vertex, vd)]);
-			point.layers.set(points3_layer);
-			points3.add(point);
+		ortho_3_graph.foreach(2, e => {
+			console.log("3 -> " + e);
 		});
 
 		let ortho_4_surface = load_cmap2('off', SP.ortho_4_off);
@@ -851,19 +840,11 @@ export let slide_ortho_partition = new Slide(
 		ortho4_surface_renderer.vertices.create({size: 0.06125, layer: points4_layer, color: 0xFF2222}).add(this.group);
 
 		let ortho_4_graph = load_graph('cg', SP.ortho_4_cg);
-		let ortho4_graph_renderer = new Renderer(ortho_4_graph);
-		ortho4_graph_renderer.edges.create({layer: points4_layer, material: mesh_edge_material}).add(this.group);
-
-		let points4 = new THREE.Group;
+		let points4 = create_branching_point(ortho_4_graph, points4_layer);
 		this.group.add(points4);
-		points_pos = ortho_4_graph.get_attribute(ortho_4_graph.vertex, "position");
-		ortho_4_graph.foreach(ortho_4_graph.vertex, vd => {
-			let point = new THREE.Mesh(point_geom, point_mat);
-			point.position.copy(points_pos[ortho_4_graph.cell(ortho_4_graph.vertex, vd)]);
-			point.layers.set(points4_layer);
-			points4.add(point);
+		ortho_4_graph.foreach(2, e => {
+			console.log("4 -> " + e);
 		});
-
 
 		let ortho_5_surface = load_cmap2('off', SP.ortho_5_off);
 		let ortho5_surface_renderer = new Renderer_Spherical(ortho_5_surface);
@@ -871,19 +852,11 @@ export let slide_ortho_partition = new Slide(
 		ortho5_surface_renderer.vertices.create({size: 0.06125, layer: points5_layer, color: 0xFF2222}).add(this.group);
 
 		let ortho_5_graph = load_graph('cg', SP.ortho_5_cg);
-		let ortho5_graph_renderer = new Renderer(ortho_5_graph);
-		ortho5_graph_renderer.edges.create({layer: points5_layer, material: mesh_edge_material}).add(this.group);
-
-		let points5 = new THREE.Group;
+		let points5 = create_branching_point(ortho_5_graph, points5_layer);
 		this.group.add(points5);
-		points_pos = ortho_5_graph.get_attribute(ortho_5_graph.vertex, "position");
-		ortho_5_graph.foreach(ortho_5_graph.vertex, vd => {
-			let point = new THREE.Mesh(point_geom, point_mat);
-			point.position.copy(points_pos[ortho_5_graph.cell(ortho_5_graph.vertex, vd)]);
-			point.layers.set(points5_layer);
-			points5.add(point);
+		ortho_5_graph.foreach(2, e => {
+			console.log("5 -> " + e);
 		});
-
 
 
 		const axis = new THREE.Vector3(0.3, 0.7, 0).normalize();
