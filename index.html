@@ -17,9 +17,9 @@
 					<h3 class='r-fit-text'>Hexahedral  Mesh  Generation</h3>
 					<h3 class='r-fit-text'>For Tubular Shapes Using Skeletons and Connection Surfaces</h3>
 					<div class="r-hstack" style="font-size: 0.5em; padding-top:2.7em;">
-						<div style="padding-right:10%" >P. Viville</div>
-						<div style="padding-right:10%">P. Kraemer</div>
-						<div style="">D. Bechmann</div>
+						<div style="padding-right:10%" ><a href="https://igg.icube.unistra.fr/en/index.php/People">P. Viville</a></div>
+						<div style="padding-right:10%"><a href="https://igg.icube.unistra.fr/en/index.php/People">P. Kraemer</a></div>
+						<div style=""><a href="https://igg.icube.unistra.fr/en/index.php/Dominique_Bechmann">D. Bechmann</a></div>
 					</div>
 					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
 					<div class="r-hstack">
@@ -27,6 +27,56 @@
 						<img src="Images/Title/ICube.png" height="40px" style="padding-right: 5%;">
 						<img src="Images/Title/CNRS.png" height="40px" style="padding-right: 5%;">
 						<img src="Images/Title/unistra.png" height="40px" >
+					</div>
+				</section>
+
+				<section id="Introduction_0"> 
+					Hex Meshes
+					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
+					<div class="r-hstack"> 
+						<ul style="font-size: 25px;">
+							<li style="padding-top: 14px;">Highly Sought After</li>
+							<li style="padding-top: 14px;">Superior Numerical Propreties for Simulation</li>
+							<li style="padding-top: 14px;">Notoriously Difficult to Produce</li>
+						</ul>
+					</div>
+				</section>
+
+				<section id="Existing Work"> 
+					Prior Works
+					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
+					<div class="r-hstack">  
+						<div class="r-vstack">  
+							<div class="r-hstack">
+								<div>  
+									<img src="Images/Existing/existing0.PNG" height="230px" style="padding-right: 10%;">
+									<p style="font-size:12px; margin-top: 0px;"><a href="http://www.cs.ubc.ca/labs/imager/tr/2013/polycut/downloads/polycut.pdf">(Livesu, ACM 2013)</a></p>
+								</div>
+								<div>  
+									<img src="Images/Existing/existing2.PNG" height="230px" style="padding-right: 0%;">
+									<p style="font-size:12px; margin-top: 0px;"><a href="http://pers.ge.imati.cnr.it/livesu/papers/LMPS16/LMPS16.pdf">(Livesu, CGF 2016)</a></p>
+								</div>
+							</div>
+							<div class="r-hstack">
+								<div>  
+									<img src="Images/Existing/existing1.PNG" height="200px" style="padding-right: 10%;">
+									<p style="font-size:12px; margin-top: 0px;"><a href="https://gaoxifeng.github.io/papers/2019/2019-OctreeMeshing.pdf">(Gao, SGP 2019)</a></p>
+								</div>
+								<div>  
+									<img src="Images/Existing/existing3.PNG" height="200px" style="padding-right: 0%;">
+									<p style="font-size:12px; margin-top: 0px;"><a href="http://research.nii.ac.jp/~takayama/dual-sheet-meshing/dual-sheet-meshing-eg2019.pdf">(Takayama, CGF 2019)</a></p>
+								</div>
+							</div>
+						</div>
+						<div>
+							<ul style="font-size: 22px;">
+								<li style="padding-top: 14px;">No Reliable Generic Method</li>
+								<li style="padding-top: 14px;">Many Specialized Methods</li>
+								<li style="padding-top: 14px;">Few Guarantees on Topology and Quality</li>
+								<li style="padding-top: 14px;">Heavy User Input</li>
+								<li style="padding-top: 14px;"></li>
+							</ul>
+						</div>
 					</div>
 				</section>
 
@@ -40,30 +90,6 @@
 					</div>
 					<div class="fragment" id="Overview_clipping"></div>
 					<div class="fragment" id="Overview_pause"></div>
-				</section>
-
-				<section id="Introduction_0"> 
-					Introduction
-					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
-					<ul>
-						<li></li>
-	
-					</ul>
-				</section>
-
-				<section id="Existing Work"> 
-					Prior Works
-					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
-					<div class="r-vstack">  
-						<div class="r-hstack">
-							<img src="Images/Existing/existing0.PNG" height="260px" style="padding-right: 10%;">
-							<img src="Images/Existing/existing2.PNG" height="260px">
-						</div>
-						<div class="r-hstack">
-							<img src="Images/Existing/existing1.PNG" height="170px" style="padding-right: 10%;">
-							<img src="Images/Existing/existing3.PNG" height="170px">
-						</div>
-					</div>
 				</section>
 				
 				<section id="Connection_Surfaces"> 
@@ -385,13 +411,15 @@
 				</section>
 
 				<section> 
-					Conclusion
+					Contributions
 					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
 					<div>
-						<ul>
-							<li></li>
-							<li></li>
-							<li></li>
+					<!-- <p style="font-size:30px; margin-top: 0px;">Contributions</p> -->
+						<ul style="font-size: 25px;">
+							<li style="padding-top: 14px;">General Sphere Partitioning Algorithm</li>
+							<li style="padding-top: 14px;">Connectivity Management Using Connection Surfaces</li>
+							<li style="padding-top: 14px;">Full Pipeline with Discrete Local Steps</li>
+							<li style="padding-top: 14px;">Highly Parallelizable Process</li>
 	
 						</ul>
 					</div>
@@ -402,9 +430,10 @@
 					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
 					<div>
 						<ul style="font-size: 25px;">
-							<li style="padding-top: 10px;">Local mesh adaptation (Livesu et al., 2016)</li>
-							<li style="padding-top: 10px;">Rework Sphere Partition</li>
-							<li style="padding-top: 10px;">Application to Gaseous Simulation in Lungs</li>
+							<li style="padding-top: 14px;">Local mesh adaptation (Livesu et al., 2016)</li>
+							<li style="padding-top: 14px;">Rework Sphere Partition</li>
+							<li style="padding-top: 14px;">Further Optimization for Larger Meshes</li>
+							<li style="padding-top: 14px;">Application to Gaseous Simulation in Lungs</li>
 						</ul>
 					</div>
 				</section>
