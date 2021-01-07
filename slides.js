@@ -54,7 +54,9 @@ const cylinder_material = new THREE.MeshBasicMaterial({
 	color: mesh_edge_color,
 });
 const point_geom = new THREE.SphereGeometry( 0.035, 16, 16 );
+const point_geom2 = new THREE.SphereGeometry( 0.14, 16, 16 );
 const point_mat = new THREE.MeshLambertMaterial({color: 0xFF0000});
+const point_mat2 = new THREE.MeshLambertMaterial({color: 0x0055DD});
 
 
 function create_branching_point(graph, layer = 0){
@@ -65,20 +67,17 @@ function create_branching_point(graph, layer = 0){
 	const branching_point = new THREE.Group;
 	const edges = new THREE.Group;
 	graph.foreach(edge, ed => {
-		console.log("edge: " + ed, position[graph.cell(vertex, ed)], position[graph.cell(vertex, graph.phi1[ed])])
 		let cylinder = new THREE.Mesh(cylinder_geometry, cylinder_material);
 		cylinder.layers.set(layer);
-		let p0 = position[graph.cell(vertex, ed)].clone().multiplyScalar(1.2);
-		let p1 = position[graph.cell(vertex, graph.phi1[ed])].clone().multiplyScalar(1.2);
-		let dir = new THREE.Vector3().subVectors(p0, p1);
+		let p0 = position[graph.cell(vertex, ed)];
+		let p1 = position[graph.cell(vertex, graph.phi1[ed])];
+		let dir = new THREE.Vector3().subVectors(p0, p1).multiplyScalar(1.2);
 
 		let len = dir.length();
 		let mid = new THREE.Vector3().addVectors(p0, p1).divideScalar(2);
 
 		let dirx = new THREE.Vector3().crossVectors(dir.normalize(), new THREE.Vector3(-0.01,0.01,1).normalize());
-		console.log(dirx);
 		let dirz = new THREE.Vector3().crossVectors(dirx, dir);
-		console.log(dirz);
 
 		let m = new THREE.Matrix4().fromArray([
 			dirx.x, dir.x, dirz.x, mid.x,
@@ -86,22 +85,29 @@ function create_branching_point(graph, layer = 0){
 			dirx.z, dir.z, dirz.z, mid.z,
 			0, 0, 0, 1]).transpose();
 		cylinder.applyMatrix4(m);
-		console.log(cylinder.rotation)
 		cylinder.scale.set(1, len, 1);
 		edges.add(cylinder);
 	});
 
 	const points = new THREE.Group;
-	graph.foreach(graph.vertex, vd => {
-		const point = new THREE.Mesh(point_geom, point_mat);
+	graph.foreach(vertex, vd => {
+		let point;
+		let deg = 0;
+		graph.foreach_dart_of(vertex, vd, d => {++deg; });
+
+		if(deg > 1)
+			point = new THREE.Mesh(point_geom2, point_mat2);
+		else
+			point = new THREE.Mesh(point_geom, point_mat);
+
 		point.position.copy(position[graph.cell(vertex, vd)]);
 		point.layers.set(layer);
+		
 		points.add(point);
 	});
 
 	branching_point.add(points);
 	branching_point.add(edges);
-	console.log(branching_point)
 	return branching_point;
 }
 
@@ -819,9 +825,6 @@ export let slide_ortho_partition = new Slide(
 		cube.position.set(-0.4, 0.4, -0.4)
 		this.group.add(cubes);
 
-
-
-
 		let ortho_3_surface = load_cmap2('off', SP.ortho_3_off);
 		let ortho3_surface_renderer = new Renderer_Spherical(ortho_3_surface);
 		ortho3_surface_renderer.geodesics.create({layer: points3_layer, color: 0xFF2222}).add(this.group);
@@ -830,9 +833,6 @@ export let slide_ortho_partition = new Slide(
 		let ortho_3_graph = load_graph('cg', SP.ortho_3_cg);
 		let points3 = create_branching_point(ortho_3_graph, points3_layer);
 		this.group.add(points3);
-		ortho_3_graph.foreach(2, e => {
-			console.log("3 -> " + e);
-		});
 
 		let ortho_4_surface = load_cmap2('off', SP.ortho_4_off);
 		let ortho4_surface_renderer = new Renderer_Spherical(ortho_4_surface);
@@ -842,9 +842,6 @@ export let slide_ortho_partition = new Slide(
 		let ortho_4_graph = load_graph('cg', SP.ortho_4_cg);
 		let points4 = create_branching_point(ortho_4_graph, points4_layer);
 		this.group.add(points4);
-		ortho_4_graph.foreach(2, e => {
-			console.log("4 -> " + e);
-		});
 
 		let ortho_5_surface = load_cmap2('off', SP.ortho_5_off);
 		let ortho5_surface_renderer = new Renderer_Spherical(ortho_5_surface);
@@ -854,10 +851,6 @@ export let slide_ortho_partition = new Slide(
 		let ortho_5_graph = load_graph('cg', SP.ortho_5_cg);
 		let points5 = create_branching_point(ortho_5_graph, points5_layer);
 		this.group.add(points5);
-		ortho_5_graph.foreach(2, e => {
-			console.log("5 -> " + e);
-		});
-
 
 		const axis = new THREE.Vector3(0.3, 0.7, 0).normalize();
 		this.clock = new Clock(true);
@@ -895,6 +888,107 @@ export let slide_ortho_partition = new Slide(
 
 	}
 );
+
+export let slide_3_4_partition = new Slide(
+	function(DOM_Ortho3_1, DOM_Ortho3_2, DOM_Ortho4_1, DOM_Ortho4_2){
+		const base3_layer = 0;
+		const ortho3_1_layer = 1;
+		const ortho3_2_layer = 2;
+		const base4_layer = 3;
+		const ortho4_1_layer = 4;
+		const ortho4_2_layer = 5;
+
+		const context_ortho3_1 = DOM_Ortho3_1.getContext('2d');
+		const context_ortho3_2 = DOM_Ortho3_2.getContext('2d');
+		const context_ortho4_1 = DOM_Ortho4_1.getContext('2d');
+		const context_ortho4_2 = DOM_Ortho4_2.getContext('2d');
+
+		this.camera = new THREE.PerspectiveCamera(75, DOM_Ortho3_1.width / DOM_Ortho3_1.height, 0.1, 1000.0);
+		this.camera.position.set(0, 0, 2.1);
+
+		const orbit_controls0  = new OrbitControls(this.camera, DOM_Ortho3_1);
+		const orbit_controls1  = new OrbitControls(this.camera, DOM_Ortho3_2);
+		const orbit_controls2  = new OrbitControls(this.camera, DOM_Ortho4_1);
+		const orbit_controls3  = new OrbitControls(this.camera, DOM_Ortho4_2);
+
+		this.scene = new THREE.Scene();
+		let ambiantLight = new THREE.AmbientLight(0xFFFFFF, ambiant_light_int);
+		let pointLight = new THREE.PointLight(0xFFFFFF, point_light_int);
+		pointLight.position.set(10,8,15);
+		this.scene.add(ambiantLight);
+		this.scene.add(pointLight);
+
+		this.group = new THREE.Group;
+		this.scene.add(this.group);
+
+		// let ortho3_1_graph = load_graph('cg', SP.orth_3_1_cg);
+		// let ortho3_1 = create_branching_point(ortho3_1_graph, base3_layer);
+		// this.group.add(ortho3_1);
+
+		this.ortho3_1_vol = Display.load_volumes_view("mesh", SP.ortho3_1_mesh);
+		this.ortho3_1_vol.layers.set(ortho3_1_layer);
+		this.group.add(this.ortho3_1_vol);
+
+		this.ortho3_2_vol = Display.load_volumes_view("mesh", SP.ortho3_2_mesh);
+		this.ortho3_2_vol.layers.set(ortho3_2_layer);
+		this.group.add(this.ortho3_2_vol);
+
+		this.ortho4_1_vol = Display.load_volumes_view("mesh", SP.ortho4_1_mesh);
+		this.ortho4_1_vol.layers.set(ortho4_1_layer);
+		this.group.add(this.ortho4_1_vol);
+
+		this.ortho4_2_vol = Display.load_volumes_view("mesh", SP.ortho4_2_mesh);
+		this.ortho4_2_vol.layers.set(ortho4_2_layer);
+		this.group.add(this.ortho4_2_vol);
+
+
+		const axis = new THREE.Vector3(0.3, 0.7, 0).normalize();
+		this.clock = new Clock(true);
+		this.time = 0;
+		this.loop = function(){
+			if(this.running){
+				stats.update();
+				this.time += this.clock.getDelta();
+				this.group.setRotationFromAxisAngle(axis, Math.PI / 60 * this.time);
+
+				this.camera.layers.enable(base3_layer);
+				this.camera.layers.enable(ortho3_1_layer);
+				main_renderer.setSize(DOM_Ortho3_1.width, DOM_Ortho3_1.height);
+				main_renderer.render(this.scene, this.camera);
+				context_ortho3_1.clearRect(0, 0, DOM_Ortho3_1.width, DOM_Ortho3_1.height);
+				context_ortho3_1.drawImage(main_renderer.domElement, 0, 0);
+
+				this.camera.layers.disable(ortho3_1_layer);
+				this.camera.layers.enable(ortho3_2_layer);
+				main_renderer.render(this.scene, this.camera);
+				context_ortho3_2.clearRect(0, 0, DOM_Ortho3_1.width, DOM_Ortho3_1.height);
+				context_ortho3_2.drawImage(main_renderer.domElement, 0, 0);
+				this.camera.layers.disable(ortho3_2_layer);
+				this.camera.layers.disable(base3_layer);
+				
+
+				this.camera.layers.enable(base4_layer);
+				this.camera.layers.enable(ortho4_1_layer);
+				main_renderer.render(this.scene, this.camera);
+				context_ortho4_1.clearRect(0, 0, DOM_Ortho3_1.width, DOM_Ortho3_1.height);
+				context_ortho4_1.drawImage(main_renderer.domElement, 0, 0);
+				this.camera.layers.disable(ortho4_1_layer);
+
+				this.camera.layers.enable(ortho4_2_layer);
+				main_renderer.render(this.scene, this.camera);
+				context_ortho4_2.clearRect(0, 0, DOM_Ortho3_1.width, DOM_Ortho3_1.height);
+				context_ortho4_2.drawImage(main_renderer.domElement, 0, 0);
+				this.camera.layers.disable(ortho4_2_layer);
+				this.camera.layers.disable(base4_layer);
+
+
+				requestAnimationFrame(this.loop.bind(this));
+			}
+		}
+
+	}
+);
+
 
 export let slide_metatron_comparison = new Slide(
 	function(DOM_livesu, DOM_ours){
