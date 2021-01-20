@@ -6,7 +6,7 @@
 		<link rel="stylesheet" href="./multiCol.css">
 		<link rel="stylesheet" href="./Reveal/reveal.css">
 		<!-- <link rel="stylesheet" href="./Reveal/theme/black.css"> -->
-		<link rel="stylesheet" href="./Reveal/theme/solarized.css">
+		<link rel="stylesheet" href="./Reveal/theme/beige.css">
 	</head>
 
 	<body>
@@ -28,18 +28,70 @@
 						<img src="Images/Title/CNRS.png" height="40px" style="padding-right: 5%;">
 						<img src="Images/Title/unistra.png" height="40px" >
 					</div>
+
+					<aside class="notes">
+						Thank you for attending my presentation.
+						<br /><br />
+						My name is Paul Viville, a PhD student at ICube in the team IGG in Strasbourg.
+						I will present the work I have done during the first year of my PhD under the supervision of Pierre Kraemer and Dominique Bechmann.
+						<br /><br />
+						This work is on the topic of hexahedral mesh generation for tubular shapes using skeletons and connection surfaces.
+						These slides contain interactive 3D images of our results, feel free to take a look for yourself during the presentation.
+						🖱️ 
+						<br /><br />
+						( 🖱️ = click )
+					</aside>
+				</section>
+
+				<section id="Overview"> 
+					Overview
+					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
+					<div class="r-hstack"> 
+						<div>
+							<canvas id="overview_input" width="350" height="400"></canvas>
+							<p style="font-size:20px; margin-top: 0px;">Input</p>
+						</div>
+						<img src="Images/Utils/arrow.png" height="80px" style="padding-right: 1%; padding-left: 1%;">
+						<div>
+							<canvas id="overview_output" width="350" height="400"></canvas>
+							<p style="font-size:20px; margin-top: 0px;">Output</p>
+						</div>
+					</div>
+					<div class="fragment" id="Overview_clipping"></div>
+					<div class="fragment" id="Overview_pause"></div>
+					<aside class="notes">
+						To give a brief overview: the purpose of our work is to start with a surface mesh,
+						for instance one extracted from medical imaging, from which a curve skeleton
+						can be extracted, and from these: produce a fully hexahedral mesh to be used as
+						a support for physical simulation. 🖱️
+						<br /><br />
+						A hexahedral mesh being a mesh composed exclusively of cells that are
+						hexahedron 🖱️, in other words: deformed cubes.🖱️
+					</aside>
 				</section>
 
 				<section id="Introduction_0"> 
 					Hex Meshes
 					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
-					<div class="r-hstack"> 
+					<div class="r-hstack">
+						<div>
+							<img src="Images/Utils/hexmesh.PNG" height="300px" >
+							<p style="font-size:20px; margin-top: 0px;"><a hreflang="https://www.hexalab.net/">Hexalab</a></p>
+						</div>
 						<ul style="font-size: 25px;">
 							<li style="padding-top: 14px;">Highly Sought After</li>
-							<li style="padding-top: 14px;">Superior Numerical Propreties for Simulation</li>
+							<li style="padding-top: 14px;">Superior Numerical Propreties</li>
 							<li style="padding-top: 14px;">Notoriously Difficult to Produce</li>
 						</ul>
 					</div>
+
+					<aside class="notes">
+						Hexahedral meshes are very interesting for applications of physical simulation.
+						Computations can be up to fifty times faster than with mixed or tetrahedral meshes.
+						Hexahedrons also allegedly have superior numerical propreties for finite element methods.
+						But it is also notoriously difficult to produce high quality hexahedral meshes. 🖱️
+						<br /><br />
+					</aside>
 				</section>
 
 				<section id="Existing Work"> 
@@ -49,21 +101,21 @@
 						<div class="r-vstack">  
 							<div class="r-hstack">
 								<div>  
-									<img src="Images/Existing/existing0.PNG" height="230px" style="padding-right: 10%;">
+									<img src="Images/Existing/existing0.PNG" height="220px" style="padding-right: 10%; margin: 0px;">
 									<p style="font-size:12px; margin-top: 0px;"><a href="http://www.cs.ubc.ca/labs/imager/tr/2013/polycut/downloads/polycut.pdf">(Livesu, ACM 2013)</a></p>
 								</div>
 								<div>  
-									<img src="Images/Existing/existing2.PNG" height="230px" style="padding-right: 0%;">
+									<img src="Images/Existing/existing2.PNG" height="220px" style="padding-right: 0%; margin: 0px;">
 									<p style="font-size:12px; margin-top: 0px;"><a href="http://pers.ge.imati.cnr.it/livesu/papers/LMPS16/LMPS16.pdf">(Livesu, CGF 2016)</a></p>
 								</div>
 							</div>
 							<div class="r-hstack">
 								<div>  
-									<img src="Images/Existing/existing1.PNG" height="200px" style="padding-right: 10%;">
+									<img src="Images/Existing/existing1.PNG" height="200px" style="padding-right: 10%; margin: 0px;">
 									<p style="font-size:12px; margin-top: 0px;"><a href="https://gaoxifeng.github.io/papers/2019/2019-OctreeMeshing.pdf">(Gao, SGP 2019)</a></p>
 								</div>
 								<div>  
-									<img src="Images/Existing/existing3.PNG" height="200px" style="padding-right: 0%;">
+									<img src="Images/Existing/existing3.PNG" height="200px" style="padding-right: 0%; margin: 0px;">
 									<p style="font-size:12px; margin-top: 0px;"><a href="http://research.nii.ac.jp/~takayama/dual-sheet-meshing/dual-sheet-meshing-eg2019.pdf">(Takayama, CGF 2019)</a></p>
 								</div>
 							</div>
@@ -71,44 +123,74 @@
 						<div>
 							<ul style="font-size: 22px;">
 								<li style="padding-top: 14px;">No Reliable Generic Method</li>
-								<li style="padding-top: 14px;">Many Specialized Methods</li>
 								<li style="padding-top: 14px;">Few Guarantees on Topology and Quality</li>
 								<li style="padding-top: 14px;">Heavy User Input</li>
-								<li style="padding-top: 14px;"></li>
+								<li style="padding-top: 14px;">Many Specialized Methods</li>
+								<!-- <li style="padding-top: 14px;"></li> -->
 							</ul>
 						</div>
 					</div>
+					<aside class="notes">
+						Over time, a large number of methods to produce hexahedral meshes have been proposed.
+						Of those, very few are generic methods that can apply to any type of geometric domain reliably.
+						On the left you have an example of the polycubes method by Livesu & al, and an octree-based subdivision
+						by Gao & al.
+						Most methods do not provide any guarantees on the topology or the quality of the mesh.
+						Some of those methods also require heavy user input to partition the initial surface in patches or verify
+						propreties. One such method is shown with the Bunny by Takayama & al.
+						<br /><br />
+						There are also a large number of methods that apply to special cases of geometric domains, including
+						one applied to tubular meshes that can be represented by skeletons, by Livesu & al, shown in the blue warrior.
+						But this method in our opinion presented a few undesirable propreties, such as having to solve a global
+						optimization problem to create the initial mesh, arbitrary choices of topology when dealing with cycles, and 
+						as you can see on the warrior's hips: asymetrical results on a symetrical domain. 🖱️
+					</aside>
 				</section>
-
-				<section id="Overview"> 
-					Overview
-					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
-					<div class="r-hstack"> 
-						<canvas id="overview_input" width="350" height="400"></canvas>
-						<img src="Images/Utils/arrow.png" height="80px" style="padding-right: 1%; padding-left: 1%;">
-						<canvas id="overview_output" width="350" height="400"></canvas>
-					</div>
-					<div class="fragment" id="Overview_clipping"></div>
-					<div class="fragment" id="Overview_pause"></div>
-				</section>
-				
+		
 				<section id="Connection_Surfaces"> 
 					Connection Surfaces
 					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
 					<img src="Images/Path_Co/spheres.png" height="300px">
-					<p style="font-size:30px; margin-top: 0px;">Quad Scaffolding based on vertex degree</p>
+					<p style="font-size:30px; margin-top: 0px;">Quad Scaffolding Based on Vertex Degree</p>
+					<aside class="notes">
+						The main challenge in producing a hexahedral mesh from a curve skeleton is handling
+						branching points, or vertices of degree 3 or more.
+						<br /><br />
+						We propose a method that uses what we call connection surfaces added on 
+						each vertex of the skeleton.
+						These connection surface will serve as scaffolding to build the geometry and 
+						Connectivity of the final mesh.
+						The connection surfaces are a partition of a sphere into a quadrilateral surface mesh,
+						with as many faces as branches incident to the vertex.
+						Euler's formula shows fairly easily that with a surface of genus 0 such a partition always is possible.
+						<br /><br />
+						You can see here how we handle a vertex of degree 1, an extremity, with a single quad. A vertex of degree 2,
+						a joint, with a sphere partitioned in 2 quads, and a vertex of degree 4, a complex branching point.
+						For joints and extremities, the vertices of the connection surfaces are set on the plane
+						orthogonal to the branch's tangent. The geometry is propagated from complex branching points through RMF. 🖱️
+					</aside>
 				</section>
 
 				<!-- <section id="Geometry"> 
 					Geometry
 					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
+					<aside class="notes">
+						<br /><br />
+					</aside>
 				</section> -->
 
 				<section id="Hexahedra Generation"> 
 					Hexahedra Generation
 					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
 					<img src="Images/Path_Co/chunk.png" height="300px">
-					<p style="font-size:30px; margin-top: 0px;">Insertion of 4 hex chunk per edge</p>
+					<p style="font-size:30px; margin-top: 0px;">Insertion of 4 Hex Chunk per Edge</p>
+					<aside class="notes">
+						On each edge of the skeleton, a chunk composed of 4 hexahedra is added.
+						It is then linked to the corresponding quads of incident vertices' connection surfaces.
+						<br /><br />
+						Having a chunk made of 4 hex associated to the quads of the connection surfaces will
+						allow us to handle any branching point generically. 🖱️
+					</aside>
 				</section>
 
 				<section id="Connectivity"> 
@@ -126,6 +208,25 @@
 							<img class="fragment" src="Images/Path_Co/stitching_5.png" height="170px">
 						</div>
 					</div>
+					<aside class="notes">
+						In order to explain how connectivity of the mesh is handled with these connection 
+						surfaces, I will run you through a simple example of a branching point with 3 branches. 🖱️
+						<br /><br />
+						First of all a connection surface composed of 3 quads is added to the vertex,
+						each branch being associated to a quad. 🖱️
+						<br /><br />
+						Subsequently, as chunks are added to incident edges, they are associated to the connection
+						surface. Each hexahedron of the chunk is linked to the edge of a quad. 🖱️
+						<br /><br />
+						This results in each edge of the connection surface being linked to 2 hexes 🖱️. Allowing us to
+						easily retrieve the pairs and stiching them together. 🖱️
+						<br /><br />
+						This method is generalizable to intersections of any degree as long as each edge is surrounded
+						by 2 quads.
+						It is fairly easy to parallelize especially with a half edge structure.
+						<br /><br />
+						I will now give a bit more detail on how these connection surfaces are obtained. 🖱️
+					</aside>
 				</section>
 
 				<section id="Sphere_Partition"> 
@@ -157,6 +258,37 @@
 							</div>
 						</div>
 					</div>
+					<aside class="notes">
+						To create the connection surfaces we develloped a generic method and use two other methods 
+						for special cases. I will start by explaining the process of the generic method.
+						Our goal is to obtain a partition of the sphere made of as many quads as there are branches in the branching point, 
+						with each quad being as convex as possible and containing it's own branch.
+
+						<br /><br />
+						The first step is creating a sphere centered on the vertex, and intersecting the branches with
+						the sphere to obtain a set of points on it's surface. 🖱️
+					
+						<br /><br />
+						Generating a proper topology and geometry with from this unstructured set of points is problematic,
+						prompting us to reverse the process. The dual of a mesh composed of N quads is a mesh composed of N vertices
+						of degree 4. 
+						We therefor start by constructing the dual mesh of our desired partition.
+						To that goal the Delaunay triangulation of these points is created as a base mesh, as seen in blue. 🖱️
+						<br /><br />
+						The Delaunay triangulation is then remeshed to obtain a mesh with only vertices of degree 4, seen in green.
+						The euristic we have used for the remeshing step uses an angle criterion to prioritize the deletion
+						and insertion of edges that modify the connectivity.
+						It might not be ideal and other methods resulting in the vertices of degree 4 only could be used. 🖱️
+						<br /><br />
+						Once the remshing is done, to obtain the partition we simply dualize the mesh and obtain
+						the final partition as seen in orange. 🖱️
+						<br /><br />
+						The choice of using the Delaunay triangulation as a base mesh was reasoned by trying to 
+						obtain a final partition as close as possible to the Voronoi diagram of the set of points on
+						the sphere, which would have the ideal propreties of convex quads each containing their 
+						point. 🖱️
+
+					</aside>
 				</section>
 
 				<section id="Results_Partition"> 
@@ -172,10 +304,21 @@
 							<p style="font-size:20px; margin-top: 0px;">5 Points<br>Failure</p>
 						</div>
 					</div>
+					<aside class="notes">
+						Our current remeshing method works well even on branching points of high degrees
+						as long as the repartition of points on the sphere is homogeneous. 
+						As you can see with the example on the left that has 14 points. 🖱️
+						<br /><br />
+						In the repartition is too heterogeneous, the method will fail to provide a proper partition
+						with a quad containing it's own point. 
+						<br /><br />
+						This failure can be compensated further down the line with geometric optimisation of the results
+						but is likely to lower the quality of the results. 🖱️
+					</aside>
 				</section>
 
 				<section id="Flat_Partition"> 
-					Flat Branching Points
+					Flat Case
 					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
 					<div class="r-hstack">
 						<div style="padding-right:2%">  
@@ -191,10 +334,18 @@
 							<p style="font-size:18px; margin-top: 0px;">5 Points</p>
 						</div>
 					</div>
+					<aside class="notes">
+						In the case of flat branching points, where all points are close to the average plane
+						a more straightforward method can be used.
+						<br /><br />
+						The points are projected onto the plane and sorted,  2 poles are created 
+						and connected by the meridians going through the mid points of each neighboring pairs of points.
+						Demonstrated here for branching points of degree 3 🖱️, 4 🖱️ and 5 🖱️
+					</aside>
 				</section>
 
 				<section id="Ortho_Partition"> 
-					Orthogonal Branching Points
+					Cube Case
 					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
 					<div class="r-hstack">
 						<div style="padding-right:2%">  
@@ -210,13 +361,25 @@
 							<p style="font-size:18px; margin-top: 0px;">5 Points</p>
 						</div>
 					</div>
+					<aside class="notes">
+						Another special case is branching points with all branches either 
+						mutually orthogonal or aligned pairwise, with a threshold angle.
+						In this case a better solution for the connection surface is the 
+						insertion of a subdivided cube on the branching point, keeping incident
+						branches as orthogonal as possible to the faces of the cube.
+						The subdivided cube exposes a compatible interface for incoming connections.
+						Here you can see the examples for branching points of degree 3 🖱️ degree 4 🖱️, and 5 🖱️
+						<br /><br />
+					</aside>
 				</section>
 
 				<section id="Ortho_Partition_3_4"> 
-					Orthogonal Branching Points
+					Cube Case
 					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
 					<div class="r-vstack">  
-						<div class="r-hstack">
+						<img src="Images/Utils/ortho.PNG" height="300px">
+						<p style="font-size:25px; margin-top: 0px;">Limitations and<br>Advantages</p>
+						<!-- <div class="r-hstack">
 							<div style="padding-right:2%">  
 								<canvas id="Ortho3_1" width="200" height="166" ></canvas>
 								<p style="font-size:18px; margin-top: 0px;">Flat</p>
@@ -235,8 +398,17 @@
 								<canvas id="Ortho4_2" width="200" height="166"></canvas>
 								<p style="font-size:18px; margin-top: 0px;">Ortho</p>
 							</div>
-						</div>
+						</div> -->
 					</div>
+					<aside class="notes">
+						This cube case has some fairly obvious limitations and advantages depending on
+						configurations, as you can see with these two examples.
+						On the top, using the flat case results in a better result than the cube case to the right.
+						On the bottom, using the cube case is more adapted.
+						<br /><br />
+						Different cases being mutually compatible allows our method greater versatility to 
+						select the best case for each skeleton vertex depending on local configuration. 🖱️
+					</aside>
 				</section>
 
 				<section id="Pipeline_0"> 
@@ -256,6 +428,20 @@
 							<p style="font-size: 30px;">Reprocessed<br>Skeleton</p>
 						</div>
 					</div>
+					<aside class="notes">
+						I will now described in broad strokes the whole pipeline from surface to 
+						final hexahedral mesh.
+						<br /><br />
+						As stated initially, the input required is a surface mesh. 🖱️
+						<br /><br />
+						From this surface mesh a skeleton curve is extracted. 🖱️
+						<br /><br />
+						A raw skeleton extracted from a surface tends to be too detailed for our needs.
+						It can therefor be reprocessed either with an automated resampling method or by hand
+						before moving on to the construction of the hex mesh.
+						Alternatively, the whole process can start from the third step using a processed skeleton 
+						and it's corresponding surface as an input. 🖱️
+					</aside>
 				</section>
 
 				<section id="Pipeline_1"> 
@@ -275,6 +461,14 @@
 							<p style="font-size: 30px;">Surface fit<br>Mesh</p>
 						</div>
 					</div>
+					<aside class="notes">
+						From the skeleton, the contact surfaces can be built to set a scaffold for the initial hex mesh. 🖱️
+						<br /><br />
+						From the scaffold, the initial mesh can be built by adding a chunk of 4 hexes to each edge. 🖱️
+						<br /><br />
+						Subsequently, the outer vertices of the mesh can be projected to the surface. 🖱️
+						<br /><br />
+					</aside>
 				</section>
 
 				<section id="Pipeline_2"> 
@@ -297,6 +491,22 @@
 						</div>
 					</div>
 					<div class="fragment" id="Pipeline2_material"></div>
+					<aside class="notes">
+						An optional but very useful step can be applied to the mesh:
+						The insertion of a padding layer. 🖱️ This layer as you can see is added in a manner
+						to prevent any hex from exposing more than one layer to the border of the domain 🖱️
+						This will be important for later geometric optimisation 🖱️
+						<br /><br />
+						The mesh can then be subdivided 🖱️
+						<br /><br />
+						And then be optimized 🖱️ 
+						The method used here to optimize the mesh is Edge-Cone Rectification, using the common quality mertric:
+						Scaled Jacobians to evaluate the quality. Scaled jacobians give an indication of the level of deformation
+						of an hexahedron compared to the unit cube, the important values being the worst and average values.
+						<br /><br />
+						These steps of padding, subdividing, and optimization, require of course manual input 
+						from the user, and their number and order will depend on the best judgment of said user. 🖱️
+					</aside>
 				</section>
 
 				<section id="Comparisions_Santa"> 
@@ -306,7 +516,7 @@
 						<div class="r-hstack">
 							<div style="padding-right:2%">  
 								<canvas id="Santa_live" width="340" height="340" ></canvas>
-								<p style="font-size:20px; margin-top: 0px;">(Livesu et al.,  2020)<br>SJ: min:0.682 - avg:0.941</p>
+								<p style="font-size:20px; margin-top: 0px;"><a href="http://pers.ge.imati.cnr.it/livesu/papers/LMPS16/LMPS16.pdf">(Livesu, CGF 2016)</a><br>SJ: min:0.682 - avg:0.941</p>
 							</div>
 							<div>  
 								<canvas id="Santa_ours" width="340" height="340"></canvas>
@@ -318,6 +528,19 @@
 						</div>
 					</div>
 					<div class="fragment" id="Santa_clipping"></div>
+					<aside class="notes">
+						This process has allowed us to produce results from input surfaces collected
+						on hexalab.net.
+						<br /><br />
+						In this case, using the Santa mesh, we were able to obtain a result with fewer hexes, a better
+						average and minimum scaled jacobian.
+						The domain processed is topologically symetrical, and using our method, the hex mesh is also symetrical topologically.
+						Compared to the prior work by Livesu & al were it is not.
+						As can be seen on the hips of the mesh.
+						🖱️
+						Other than that, as you can see on the heat map coloring, the repartition of lower quality
+						elements is in the same features with both our method and that of Livesu. 🖱️
+					</aside>
 				</section>
 
 				<section id="Comparisions_Metatron"> 
@@ -327,7 +550,7 @@
 						<div class="r-hstack">
 							<div style="padding-right:2%">  
 								<canvas id="Meta_live" width="340" height="340" ></canvas>
-								<p style="font-size:20px; margin-top: 0px;">(Livesu et al.,  2020)<br>SJ: min:0.682 - avg:0.941</p>
+								<p style="font-size:20px; margin-top: 0px;"><a href="http://pers.ge.imati.cnr.it/livesu/papers/LPPSC20/LPPSC20.pdf">(Livesu, ACM 2020)</a><br>SJ: min:0.682 - avg:0.941</p>
 							</div>
 							<div>  
 								<canvas id="Meta_ours" width="340" height="340"></canvas>
@@ -339,6 +562,12 @@
 						</div>
 					</div>
 					<div class="fragment" id="Metatron_clipping"></div>
+					<aside class="notes">
+						We also applied our method to meshes from other works, this one on block decomposition: LoopyCuts, once again by Livesu & al. 🖱️
+						<br /><br />
+						As you can see, our method was able to process branching points in different ways, providing us with a much better
+						minimum scaled jacobian. 🖱️
+					</aside>
 				</section>
 
 				<section id="Results_Dinopet"> 
@@ -351,6 +580,17 @@
 					</div>
 					<div class="fragment" id="Results_Dinopet_material"></div>
 					<div class="fragment" id="Results_Dinopet_Clipping"></div>
+					<aside class="notes">
+						We applied our method to a variety of different meshes with various features.
+						<br /><br />
+						Here you can see it applied to the dinopet. As you can see, aside from the the beak, and the tip of the tail, the fitting
+						is pretty good.
+						The tip of the tale could probably be fixed with a small modificiation by hand to the skeleton.
+						🖱️
+						<br/><br/>
+						🖱️ as you can see, most elements have a good quality, 🖱️ with the worst elements being incident to the branching points.
+						🖱️
+					</aside>
 				</section>
 
 				<section id="Results_Horse"> 
@@ -363,6 +603,16 @@
 					</div>
 					<div class="fragment" id="Results_Horse_material"></div>
 					<div class="fragment" id="Results_Horse_Clipping"></div>
+					<aside class="notes">
+						Here the method is applied to a horse.
+						Once again, the fitting is pretty good aside from the sharp features of the ears.
+						<br /><br />
+						🖱️
+						<br/>
+						🖱️
+						<br/>
+						🖱️
+					</aside>
 				</section>
 
 				<section id="Results_Cycles"> 
@@ -375,6 +625,16 @@
 					</div>
 					<div class="fragment" id="Results_Cycles_material"></div>
 					<div class="fragment" id="Results_Cycles_Clipping"></div>
+					<aside class="notes">
+						Here the method is applied to a looping mesh, with a complex branching point at it's core.
+						As you can see, the fitting to a surface well represented by curve skeleton is almost perfect.
+						<br /><br />
+						🖱️ The quality along the branches is very good.
+						<br/>
+						🖱️ And the core with eight branches joining in one point was handled acceptably.
+						<br/>
+						🖱️
+					</aside>
 				</section>
 
 				<section id="Results_Fertility"> 
@@ -387,6 +647,11 @@
 					</div>
 					<div class="fragment" id="Results_Fertility_material"></div>
 					<div class="fragment" id="Results_Fertility_Clipping"></div>
+					<aside class="notes">
+						Here is one more example.
+						<br /><br />
+						🖱️🖱️🖱️
+					</aside>
 				</section>
 
 				<section id="Limitations"> 
@@ -408,34 +673,103 @@
 							<div class="fragment" id="Edge_mech_vol_clip"></div>
 						</div>
 					</div>
+					<aside class="notes">
+						Our method has limitations with objects that are not well represented by their curve skeleton.
+						Such as object with elongated slices or sharp features 🖱️
+						🖱️ in the case of the rocker arm, the elongated belly causes very deformed hexahedra to appear.
+						The quality remains decent, but the elongated shape of the elements is not necessarily desirable. 🖱️
+						<br /><br />
+						In the case of the mech piece though 🖱️
+						The Curve skeleton does not represent the shape well, it has a complex slice and sharp feature 🖱️
+						Causing our method to fail and output a mesh that is essentially unusable 🖱️
+						🖱️
+					</aside>
 				</section>
 
 				<section> 
 					Contributions
 					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
 					<div>
-					<!-- <p style="font-size:30px; margin-top: 0px;">Contributions</p> -->
 						<ul style="font-size: 25px;">
-							<li style="padding-top: 14px;">General Sphere Partitioning Algorithm</li>
+							<li style="padding-top: 0px;">General Sphere Partitioning Algorithm</li>
 							<li style="padding-top: 14px;">Connectivity Management Using Connection Surfaces</li>
-							<li style="padding-top: 14px;">Full Pipeline with Discrete Local Steps</li>
-							<li style="padding-top: 14px;">Highly Parallelizable Process</li>
-	
+							<li style="padding-top: 14px;">Full Pipeline with Discrete Local Steps</li>	
 						</ul>
 					</div>
-					</section>
+					<aside class="notes">
+						The method we have presented leverages the skeletal representation of a domain to construct a high quality
+						mesh whose elements are aligned with the geometry and have a mostly regular connectivity.
+						<br /><br />
+						Our contribution with this work is threefold. 
+						We provide a new sphere quad partitioning algorithm.
+						<br/>
+						We propose a method to handle mesh connectivity using connection surfaces as a scaffold.
+						<br />
+						And our method provides a way to process the geometry with a full pipeline of discrete local steps. 
+						That are not affected by global features such as cycles. And each step can be substituted easily by
+						a different method so long as the step outputs a result compatible with the rest.<br />
+						🖱️
+					</aside>	
+				</section>
+				<section> 
+					Advantages
+					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
+					<div>
+						<ul style="font-size: 25px;">
+							<li style="padding-top: 0px;">Minimal User Input</li>
+							<li style="padding-top: 14px;">Highly Parallelizable Process</li>
+							<li style="padding-top: 14px;">Hex Mesh Topologically Aligned with Boundary</li>
+							<li style="padding-top: 14px;">Structured Mesh</li>
+						</ul>
+					</div>
+					<aside class="notes">
+						Our method features some interesting properties.
+						It requires very little user input aside from optional minor changes. And the whole process
+						of generation of the mesh and optimization can be done in interactive time.
+						<br />
+						The whole processing being composed of discrete steps applied locally means it is
+						very easy to parallelize efficiently.
+						<br />
+						The geometry of the mesh is aligned with the boundary of the domain, which is desirable 
+						for fluids simulation.
+						<br />
+						And finally, the mesh built is very structured and has clear characteristics that can be exploited
+						in further modifications of the mesh. Such as skeleton aligned refinements.
+						🖱️
+					</aside>	
+				</section>
 
 				<section> 
 					Future Work
 					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
 					<div>
 						<ul style="font-size: 25px;">
-							<li style="padding-top: 14px;">Local mesh adaptation (Livesu et al., 2016)</li>
+							<li style="padding-top: 14px;">Local mesh adaptation <a href="http://pers.ge.imati.cnr.it/livesu/papers/LMPS16/LMPS16.pdf">(Livesu, CGF 2016)</a></li>
 							<li style="padding-top: 14px;">Rework Sphere Partition</li>
 							<li style="padding-top: 14px;">Further Optimization for Larger Meshes</li>
 							<li style="padding-top: 14px;">Application to Gaseous Simulation in Lungs</li>
 						</ul>
 					</div>
+					<aside class="notes">
+						In spite of already promising results, a number of improvements can still be made to our method.
+						For one, we are planning on exploring the topic of local mesh adaption that is mention by Livesu & al 
+						in their original article on the topic.
+						<br />
+						<br />
+						We also plan on improving further the sphere partitioning euristic. It currently provides workable results
+						but could possibly be improved with more time. We are especially interested in finding out if there exists a 
+						cannonical quad partition of a sphere that could be used.
+						<br />
+						<br />
+						In the current state, our process could also be further optimized. The whole method being completely deterministic,
+						it should be possible to improve memory management and parallel processing. Since our target applications
+						are in fluid simulation, we will have to be able to produce very large meshes in the order of millions of hexes efficiently.
+						<br/>
+						<br />
+						One current application that we are starting to work on in partnership with a team that does fluids simulation
+						is to apply our method to the construction of dynamic meshes for gaseous simulation in lungs.
+						🖱️
+					</aside>
 				</section>
 
 				<section> 
@@ -444,7 +778,7 @@
 					<div class="r-vstack">
 						<div>
 							<ul style="font-size: 25px;">
-								<li>Thanks to (Bracci et al., 2019) for <a hreflang="https://www.hexalab.net/">Hexalab</a></li>
+								<li>Thanks to <a hreflang="https://www.sciencedirect.com/science/article/abs/pii/S0010448518304238">(Bracci, CAD 2019)</a> for <a hreflang="https://www.hexalab.net/">Hexalab</a></li>
 							</ul>
 						</div>
 						<div>
@@ -455,13 +789,72 @@
 							</p>
 						</div>
 					</div>
-					</section>
+					<aside class="notes">
+						Thank you for taking the time to listen to my presentation.
+						I would like to give a special thanks to the team that created hexalab and centralized 
+						articles and results for hexahedral meshing.
+						<br /><br />
+						I will know answer to questions.
+						🖱️
+					</aside>	
 				</section>
+				
 
-				<!-- <section> 
+				<section> 
 					Appendix
 					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
-				</section> -->
+				</section>
+
+				<section id="Remeshing"> 
+					Remeshing
+					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
+					<div class="r-vstack">  
+						<div class="r-hstack">
+							<img src="Images/Path_Co/path_u_0.png" height="170px">
+							<img class="fragment" src="Images/Path_Co/path_u_1.png" height="170px">
+							<img class="fragment" src="Images/Path_Co/path_u_2.png" height="170px">
+						</div>
+						<div class="r-hstack">
+							<img class="fragment" src="Images/Path_Co/path_u_3.png" height="170px">
+							<img class="fragment" src="Images/Path_Co/path_u_4.png" height="170px">
+						</div>
+					</div>
+					<aside class="notes">
+						<br /><br />
+						🖱️
+					</aside>
+				</section>
+
+				<section id="Remeshing"> 
+					Remeshing
+					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
+					<div class="r-vstack">  
+						<div class="r-hstack">
+							<img src="Images/Path_Co/path_e_0.png" height="190px">
+							<img class="fragment" src="Images/Path_Co/path_e_1.png" height="190px">
+						</div>
+						<div class="r-hstack">
+							<img class="fragment" src="Images/Path_Co/path_e_2.png" height="190px">
+							<img class="fragment" src="Images/Path_Co/path_e_3.png" height="190px">
+						</div>
+					</div>
+					<aside class="notes">
+						<br /><br />
+						🖱️
+					</aside>
+				</section>
+
+				<section id="Results"> 
+					Results Comparisons
+					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
+					<div class="r-vstack">  
+						<img src="Images/Utils/results.PNG" height="340px">
+					</div>
+					<aside class="notes">
+						<br /><br />
+					</aside>
+				</section>
+
 			</div>
 		</div>
 
@@ -495,6 +888,8 @@
 				slide_edge_cases,
 			} from './slides.js';
 
+			import RevealNotes from './Reveal/notes/notes.esm.js'
+
 			let slides = new Array();
 			slides["Overview"] = slide_overview;
 			slides["Sphere_Partition"] = slide_sphere_partition;
@@ -511,7 +906,7 @@
 			slides["Results_Dinopet"] = slide_dinopet_result;
 			slides["Results_Cycles"] = slide_cycles_result;
 			slides["Limitations"] = slide_edge_cases;
-			slides["Ortho_Partition_3_4"] = slide_3_4_partition;
+			// slides["Ortho_Partition_3_4"] = slide_3_4_partition;
 			
 			let active_slide;
 			Reveal.addEventListener('slidechanged', function(event) {
@@ -535,9 +930,11 @@
 			Reveal.initialize({
 				touch: false, 
 				slideNumber: 'c/t',
-				transition: 'none'
+				transition: 'none',
+				showNotes: true,
+
+				plugins: [RevealNotes]
 			}).then(() => {
-				
 				slides["Overview"].init(
 					document.getElementById("overview_input"),
 				 	document.getElementById("overview_output")
@@ -572,12 +969,12 @@
 					document.getElementById("OP_5Points")
 				);
 				
-				slides["Ortho_Partition_3_4"].init(
-					document.getElementById("Ortho3_1"),
-					document.getElementById("Ortho3_2"),
-					document.getElementById("Ortho4_1"),
-					document.getElementById("Ortho4_2")
-				);
+				// slides["Ortho_Partition_3_4"].init(
+				// 	document.getElementById("Ortho3_1"),
+				// 	document.getElementById("Ortho3_2"),
+				// 	document.getElementById("Ortho4_1"),
+				// 	document.getElementById("Ortho4_2")
+				// );
 
 				slides["Pipeline_0"].init(
 					document.getElementById("Pipeline0_surface"),

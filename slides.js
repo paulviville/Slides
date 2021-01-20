@@ -904,7 +904,7 @@ export let slide_3_4_partition = new Slide(
 		const context_ortho4_2 = DOM_Ortho4_2.getContext('2d');
 
 		this.camera = new THREE.PerspectiveCamera(75, DOM_Ortho3_1.width / DOM_Ortho3_1.height, 0.1, 1000.0);
-		this.camera.position.set(0, 0, 2.1);
+		this.camera.position.set(0, 0, 1.5);
 
 		const orbit_controls0  = new OrbitControls(this.camera, DOM_Ortho3_1);
 		const orbit_controls1  = new OrbitControls(this.camera, DOM_Ortho3_2);

@@ -31,8 +31,8 @@ section.has-dark-background, section.has-dark-background h1, section.has-dark-ba
   --heading3-size: 1.55em;
   --heading4-size: 1em;
   --code-font: monospace;
-  --link-color: #8b743d;
-  --link-color-hover: #c0a86e;
+  --link-color: #260fa8;
+  --link-color-hover: #3f31be;
   --selection-background-color: rgba(79, 64, 28, 0.99);
   --selection-color: #fff; }
 
@@ -253,12 +253,12 @@ section.has-dark-background, section.has-dark-background h1, section.has-dark-ba
  * LINKS
  *********************************************/
 .reveal a {
-  color: #8b743d;
+  color: #1317f8;
   text-decoration: none;
   transition: color .15s ease; }
 
 .reveal a:hover {
-  color: #c0a86e;
+  color: #222092;
   text-shadow: none;
   border: none; }
 
