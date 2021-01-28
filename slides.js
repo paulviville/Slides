@@ -173,7 +173,7 @@ export let slide_overview = new Slide(
 				stats.update();
 
 				this.time += this.clock.getDelta() * this.on;
-				this.group.setRotationFromAxisAngle(axis, Math.PI / 45 * this.time);
+				this.group.setRotationFromAxisAngle(axis, Math.PI / 90 * this.time);
 
 				this.vessels_surface.material.opacity = 0.8;
 				this.vessels_surface.material.side = THREE.FrontSide;
@@ -256,7 +256,7 @@ export let slide_process_0 = new Slide(
 			if(this.running){
 				stats.update();
 				this.time += this.clock.getDelta();
-				this.group.setRotationFromAxisAngle(axis, Math.PI / 45 * this.time);
+				this.group.setRotationFromAxisAngle(axis, Math.PI / 90 * this.time);
 
 				this.cactus_surface.material.opacity = 1;
 				main_renderer.setSize(DOM_surface.width, DOM_surface.height);
@@ -347,7 +347,7 @@ export let slide_process_1 = new Slide(
 			if(this.running){
 				stats.update();
 				this.time += this.clock.getDelta();
-				this.group.setRotationFromAxisAngle(axis, Math.PI / 45 * this.time);
+				this.group.setRotationFromAxisAngle(axis, Math.PI / 90 * this.time);
 
 				this.camera.layers.enable(base_layer);
 				this.camera.layers.enable(scaffold_layer);
@@ -450,7 +450,7 @@ export let slide_process_2 = new Slide(
 			if(this.running){
 				stats.update();
 				this.time += this.clock.getDelta();
-				this.group.setRotationFromAxisAngle(axis, Math.PI / 45 * this.time);
+				this.group.setRotationFromAxisAngle(axis, Math.PI / 90 * this.time);
 
 				this.camera.layers.enable(padding_layer);
 				main_renderer.setSize(DOM_padding.width, DOM_padding.height);
@@ -1042,7 +1042,7 @@ export let slide_metatron_comparison = new Slide(
 				stats.update();
 
 				this.time += this.clock.getDelta();
-				this.group.setRotationFromAxisAngle(axis, Math.PI / 45 * this.time);
+				this.group.setRotationFromAxisAngle(axis, Math.PI / 90 * this.time);
 
 				this.camera.layers.enable(livesu_layer);
 				main_renderer.setSize(DOM_livesu.width, DOM_livesu.height);
@@ -1190,7 +1190,7 @@ export let slide_fertility_result = new Slide(
 					clip_volumes(this.fertility_renderer);
 				}
 				this.time += this.clock.getDelta();
-				this.group.setRotationFromAxisAngle(axis, Math.PI / 45 * this.time);
+				this.group.setRotationFromAxisAngle(axis, Math.PI / 90 * this.time);
 
 				this.camera.layers.enable(base_layer);
 				main_renderer.setSize(DOM_fertility.width, DOM_fertility.height);
@@ -1255,7 +1255,7 @@ export let slide_dinopet_result = new Slide(
 				stats.update();
 
 				this.time += this.clock.getDelta();
-				this.group.setRotationFromAxisAngle(axis, Math.PI / 45 * this.time);
+				this.group.setRotationFromAxisAngle(axis, Math.PI / 90 * this.time);
 
 				this.camera.layers.enable(base_layer);
 				main_renderer.setSize(DOM_dinopet.width, DOM_dinopet.height);
@@ -1319,7 +1319,7 @@ export let slide_horse_result = new Slide(
 				stats.update();
 
 				this.time += this.clock.getDelta();
-				this.group.setRotationFromAxisAngle(axis,  Math.PI/2 + Math.PI / 45 * this.time);
+				this.group.setRotationFromAxisAngle(axis,  Math.PI/2 + Math.PI / 90 * this.time);
 
 				this.camera.layers.enable(base_layer);
 				main_renderer.setSize(DOM_horse.width, DOM_horse.height);
@@ -1383,7 +1383,7 @@ export let slide_cycles_result = new Slide(
 				stats.update();
 
 				this.time += this.clock.getDelta();
-				this.group.setRotationFromAxisAngle(axis,  Math.PI/2 + Math.PI / 45 * this.time);
+				this.group.setRotationFromAxisAngle(axis,  Math.PI/2 + Math.PI / 90 * this.time);
 
 				this.camera.layers.enable(base_layer);
 				main_renderer.setSize(DOM_cycles.width, DOM_cycles.height);

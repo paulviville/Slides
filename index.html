@@ -39,7 +39,7 @@
 						These slides contain interactive 3D images of our results, feel free to take a look for yourself during the presentation.
 						🖱️ 
 						<br /><br />
-						( 🖱️ = click )
+						( 🖱️ = next )
 					</aside>
 				</section>
 
@@ -167,7 +167,8 @@
 						You can see here how we handle a vertex of degree 1, an extremity, with a single quad. A vertex of degree 2,
 						a joint, with a sphere partitioned in 2 quads, and a vertex of degree 4, a complex branching point.
 						For joints and extremities, the vertices of the connection surfaces are set on the plane
-						orthogonal to the branch's tangent. The geometry is propagated from complex branching points through RMF. 🖱️
+						orthogonal to the branch's tangent. The geometry is propagated from complex branching points through 
+						rotation minimizing frames. 🖱️
 					</aside>
 				</section>
 
@@ -216,7 +217,7 @@
 						each branch being associated to a quad. 🖱️
 						<br /><br />
 						Subsequently, as chunks are added to incident edges, they are associated to the connection
-						surface. Each hexahedron of the chunk is linked to the edge of a quad. 🖱️
+						surface. Each hexahedron of the chunk is linked to the corresponding edge of a quad. 🖱️
 						<br /><br />
 						This results in each edge of the connection surface being linked to 2 hexes 🖱️. Allowing us to
 						easily retrieve the pairs and stiching them together. 🖱️
@@ -269,7 +270,7 @@
 						the sphere to obtain a set of points on it's surface. 🖱️
 					
 						<br /><br />
-						Generating a proper topology and geometry with from this unstructured set of points is problematic,
+						Generating a proper topology and geometry from this unstructured set of points is problematic,
 						prompting us to reverse the process. The dual of a mesh composed of N quads is a mesh composed of N vertices
 						of degree 4. 
 						We therefor start by constructing the dual mesh of our desired partition.
@@ -280,13 +281,14 @@
 						and insertion of edges that modify the connectivity.
 						It might not be ideal and other methods resulting in the vertices of degree 4 only could be used. 🖱️
 						<br /><br />
-						Once the remshing is done, to obtain the partition we simply dualize the mesh and obtain
-						the final partition as seen in orange. 🖱️
+						Once the remshing is done, to obtain the partition we simply dualize the mesh, with each vertex of the dual being placed on the 
+						corresponding face's barycenter,
+						and obtain the final partition as seen in orange. 🖱️
 						<br /><br />
 						The choice of using the Delaunay triangulation as a base mesh was reasoned by trying to 
 						obtain a final partition as close as possible to the Voronoi diagram of the set of points on
 						the sphere, which would have the ideal propreties of convex quads each containing their 
-						point. 🖱️
+						point. In some specific cases our partition will be the Voronoi Diagram 🖱️
 
 					</aside>
 				</section>
@@ -309,7 +311,7 @@
 						as long as the repartition of points on the sphere is homogeneous. 
 						As you can see with the example on the left that has 14 points. 🖱️
 						<br /><br />
-						In the repartition is too heterogeneous, the method will fail to provide a proper partition
+						If the repartition is too heterogeneous, the method will fail to provide a proper partition
 						with a quad containing it's own point. 
 						<br /><br />
 						This failure can be compensated further down the line with geometric optimisation of the results
@@ -363,7 +365,7 @@
 					</div>
 					<aside class="notes">
 						Another special case is branching points with all branches either 
-						mutually orthogonal or aligned pairwise, with a threshold angle.
+						mutually orthogonal or aligned pairwise, within a threshold angle.
 						In this case a better solution for the connection surface is the 
 						insertion of a subdivided cube on the branching point, keeping incident
 						branches as orthogonal as possible to the faces of the cube.
@@ -479,8 +481,8 @@
 							<canvas  id="Pipeline2_padding" width="220" height="360"></canvas>
 							<p style="font-size: 30px;">Padded<br>Mesh</p>
 						</div>
-						<div class="fragment" id="Pipeline2_rotate"></div>
-						<div class="fragment" id="Pipeline2_rotate2"></div>
+						<!-- <div class="fragment" id="Pipeline2_rotate"></div>
+						<div class="fragment" id="Pipeline2_rotate2"></div> -->
 						<div class="fragment" style="padding-right:2%">  
 							<canvas id="Pipeline2_result" width="220" height="360"></canvas>
 							<p style="font-size: 30px;">Subdivided<br>Mesh</p>
@@ -493,8 +495,8 @@
 					<div class="fragment" id="Pipeline2_material"></div>
 					<aside class="notes">
 						An optional but very useful step can be applied to the mesh:
-						The insertion of a padding layer. 🖱️ This layer as you can see is added in a manner
-						to prevent any hex from exposing more than one layer to the border of the domain 🖱️
+						The insertion of a padding layer. This layer as you can see is added in a manner
+						to prevent any hex from exposing more than one layer to the border of the domain
 						This will be important for later geometric optimisation 🖱️
 						<br /><br />
 						The mesh can then be subdivided 🖱️
@@ -565,7 +567,7 @@
 					<aside class="notes">
 						We also applied our method to meshes from other works, this one on block decomposition: LoopyCuts, once again by Livesu & al. 🖱️
 						<br /><br />
-						As you can see, our method was able to process branching points in different ways, providing us with a much better
+						As you can see, our method was able to process branching points in various ways, providing us with a much better
 						minimum scaled jacobian. 🖱️
 					</aside>
 				</section>

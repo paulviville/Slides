@@ -46,7 +46,7 @@ void main() {
 		case 7: p = v7; break;
 	}
 
-	vec3 plane = normalize(vec3(-1, 0, -1));
+	vec3 plane = normalize(vec3(-1, 0, -2));
 	float scale = max_scale;
 
 	vec3 c = vec3(modelMatrix * vec4(center, 1.0));
