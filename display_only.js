@@ -145,6 +145,8 @@ export function load_volumes_view(format, file_str, params = {}){
 		hex_qualities.push(qual);
 	});
 	avg_quality /= nb_hex;
+	max_quality = params.max || max_quality;
+	min_quality = params.min || min_quality;
 	const quality_diff = max_quality - min_quality;
 
 	const green = new THREE.Color(0x2EEE71);

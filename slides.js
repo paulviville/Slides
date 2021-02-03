@@ -25,6 +25,17 @@ import * as SP from './Files/sphere_partition_files.js';
 import Stats from './CMapJS/Dependencies/stats.module.js'
 import * as Display from './display_only.js';
 
+let v0 = new THREE.Vector3(-0.5691713960140607, -0.1791835876340561, 0.8024569545352532)
+let v1 = new THREE.Vector3(0.9343240420699345, 0.1814724321001853, 0.30676756803440447)
+let v2 = new THREE.Vector3(-0.12054584413588124 ,0.41561552883270425 ,-0.9015167395310413)
+
+let n = new THREE.Vector3()
+n.crossVectors(v0, v1).normalize();
+n.add(v1.clone().cross(v2).normalize());
+n.add(v2.clone().cross(v0).normalize());
+n.normalize();
+console.log("n is worth:", n)
+
 let main_renderer = new THREE.WebGLRenderer({
 	antialias: true,
 	alpha: true});
@@ -46,20 +57,20 @@ let bb = BoundingBox(vessels_surface.get_attribute(vessels_surface.vertex, "posi
 console.log(bb)
 
 let stats = new Stats();
-document.body.appendChild(stats.dom);
+// document.body.appendChild(stats.dom);
 
 
 const cylinder_geometry = new THREE.CylinderGeometry(0.0125, 0.0125, 1, 20);
 const cylinder_material = new THREE.MeshBasicMaterial({
 	color: mesh_edge_color,
 });
-const point_geom = new THREE.SphereGeometry( 0.035, 16, 16 );
-const point_geom2 = new THREE.SphereGeometry( 0.14, 16, 16 );
+const point_geom = new THREE.SphereGeometry( 0.05, 16, 16 );
+const point_geom2 = new THREE.SphereGeometry( 0.18, 16, 16 );
 const point_mat = new THREE.MeshLambertMaterial({color: 0xFF0000});
 const point_mat2 = new THREE.MeshLambertMaterial({color: 0x0055DD});
 
 
-function create_branching_point(graph, layer = 0){
+function create_branching_point(graph, layer = 0, center_layer ){
 	const vertex = graph.vertex;
 	const edge = graph.edge;
 	const position = graph.get_attribute(vertex, "position");
@@ -68,7 +79,7 @@ function create_branching_point(graph, layer = 0){
 	const edges = new THREE.Group;
 	graph.foreach(edge, ed => {
 		let cylinder = new THREE.Mesh(cylinder_geometry, cylinder_material);
-		cylinder.layers.set(layer);
+		cylinder.layers.set(center_layer == undefined? layer : center_layer);
 		let p0 = position[graph.cell(vertex, ed)];
 		let p1 = position[graph.cell(vertex, graph.phi1[ed])];
 		let dir = new THREE.Vector3().subVectors(p0, p1).multiplyScalar(1.2);
@@ -85,7 +96,7 @@ function create_branching_point(graph, layer = 0){
 			dirx.z, dir.z, dirz.z, mid.z,
 			0, 0, 0, 1]).transpose();
 		cylinder.applyMatrix4(m);
-		cylinder.scale.set(1, len, 1);
+		cylinder.scale.set(2, len, 2);
 		edges.add(cylinder);
 	});
 
@@ -95,15 +106,20 @@ function create_branching_point(graph, layer = 0){
 		let deg = 0;
 		graph.foreach_dart_of(vertex, vd, d => {++deg; });
 
-		if(deg > 1)
-			point = new THREE.Mesh(point_geom2, point_mat2);
-		else
+		if(deg > 1){
+			let center_point = new THREE.Mesh(point_geom2, point_mat2);
+			center_point.position.copy(position[graph.cell(vertex, vd)]);
+			center_point.layers.set(center_layer == undefined? layer : center_layer);
+			branching_point.add(center_point);
+		}
+		else{
 			point = new THREE.Mesh(point_geom, point_mat);
 
-		point.position.copy(position[graph.cell(vertex, vd)]);
-		point.layers.set(layer);
+			point.position.copy(position[graph.cell(vertex, vd)]);
+			point.layers.set(layer);
+			points.add(point);
+		}
 		
-		points.add(point);
 	});
 
 	branching_point.add(points);
@@ -201,6 +217,111 @@ export let slide_overview = new Slide(
 
 
 let cactus_skel = load_graph("cg", Cactus.cactus_cg);
+
+export let slide_process_simple = new Slide(
+	function(DOM_surface, DOM_skel, DOM_scaffold, DOM_mesh){
+		const surface_layer = 0;
+		const skel_layer = 1;
+		const skel_vert_layer = 4;
+		const scaffold_layer = 2;
+		const mesh_layer = 3;
+
+		const context_surface = DOM_surface.getContext('2d');
+		const context_skel = DOM_skel.getContext('2d');
+		const context_scaffold = DOM_scaffold.getContext('2d');
+		const context_mesh = DOM_mesh.getContext('2d');
+
+		this.camera = new THREE.PerspectiveCamera(75, DOM_surface.width / DOM_surface.height, 0.1, 1000.0);
+		this.camera.position.set(0, 0, 0.6);
+
+		const orbit_controls_surface = new OrbitControls(this.camera, DOM_surface);
+		const orbit_controls_skel = new OrbitControls(this.camera, DOM_skel);
+		const orbit_controls_scaffold = new OrbitControls(this.camera, DOM_scaffold);
+		const orbit_controls_mesh = new OrbitControls(this.camera, DOM_mesh);
+
+		this.scene = new THREE.Scene();
+		let ambiantLight = new THREE.AmbientLight(0xFFFFFF, ambiant_light_int);
+		let pointLight = new THREE.PointLight(0xFFFFFF, point_light_int);
+		pointLight.position.set(10,8,15);
+		ambiantLight.layers.enable(surface_layer);
+		ambiantLight.layers.enable(skel_layer);
+		ambiantLight.layers.enable(scaffold_layer);
+		ambiantLight.layers.enable(mesh_layer);
+		pointLight.layers.enable(surface_layer);
+		pointLight.layers.enable(skel_layer);
+		pointLight.layers.enable(scaffold_layer);
+		pointLight.layers.enable(mesh_layer);
+		this.scene.add(ambiantLight);
+		this.scene.add(pointLight);
+
+		this.group = new THREE.Group;
+		this.scene.add(this.group);
+
+		this.cactus_surface = Display.load_surface_view("off", Cactus.cactus_off, {transparent: true, opacity: 1});
+		this.cactus_surface.layers.set(surface_layer);
+		this.group.add(this.cactus_surface);
+
+		let cactus_skel = load_graph("cg", Cactus.cactus_simplified_cg);
+		this.skel_renderer = new Renderer(cactus_skel);
+		this.skel_renderer.edges.create({layer: skel_layer, material: mesh_edge_material}).add(this.group);
+		this.skel_renderer.vertices.create({layer: skel_vert_layer, color: 0x00ff00, size:0.025}).add(this.group);
+
+		let cactus_scaffold = load_cmap2("off", Cactus.cactus_scaffold_off);
+		this.scaffold_renderer = new Renderer(cactus_scaffold);
+		this.scaffold_renderer.edges.create({layer: scaffold_layer, color: 0xFF0000}).add(this.group);
+
+
+		this.cactus_result_vol = Display.load_volumes_view("mesh", Cactus.cactus_mesh);
+		this.cactus_result_vol.layers.set(mesh_layer);
+		this.group.add(this.cactus_result_vol);
+		this.cactus_result_vol.material.uniforms.clipping.value = 1;
+
+
+		const axis = new THREE.Vector3(0, 1, 0);
+		this.clock = new Clock(true);
+		this.time = 0;
+
+		this.loop = function(){
+			if(this.running){
+				stats.update();
+				this.time += this.clock.getDelta();
+				this.group.setRotationFromAxisAngle(axis, Math.PI / 90 * this.time);
+
+				this.cactus_surface.material.opacity = 1;
+				main_renderer.setSize(DOM_surface.width, DOM_surface.height);
+				main_renderer.render(this.scene, this.camera);
+				context_surface.clearRect(0, 0, DOM_surface.width, DOM_surface.height);
+				context_surface.drawImage(main_renderer.domElement, 0, 0);
+
+				this.cactus_surface.material.opacity = 0.3;
+				this.camera.layers.enable(skel_layer);
+				this.camera.layers.enable(skel_vert_layer);
+				main_renderer.render(this.scene, this.camera);
+				context_skel.clearRect(0, 0, DOM_skel.width, DOM_skel.height);
+				context_skel.drawImage(main_renderer.domElement, 0, 0);
+				this.camera.layers.disable(skel_vert_layer);
+
+				this.cactus_surface.material.opacity = 0.3;
+				this.camera.layers.enable(scaffold_layer);
+				main_renderer.render(this.scene, this.camera);
+				context_scaffold.clearRect(0, 0, DOM_scaffold.width, DOM_scaffold.height);
+				context_scaffold.drawImage(main_renderer.domElement, 0, 0);
+				this.camera.layers.disable(scaffold_layer);
+				this.camera.layers.disable(skel_layer);
+
+				this.camera.layers.enable(mesh_layer);
+				main_renderer.render(this.scene, this.camera);
+				context_mesh.clearRect(0, 0, DOM_mesh.width, DOM_mesh.height);
+				context_mesh.drawImage(main_renderer.domElement, 0, 0);
+
+				this.camera.layers.disable(mesh_layer);
+
+				requestAnimationFrame(this.loop.bind(this));
+			}
+		}
+
+	}
+);
 
 export let slide_process_0 = new Slide(
 	function(DOM_surface, DOM_skel, DOM_skel_simple){
@@ -481,12 +602,14 @@ let sphere_mat = new THREE.MeshLambertMaterial({color: 0xEEEEEE, transparent: tr
 let sphere_geom = new THREE.SphereGeometry( 0.995, 64, 64 );
 
 export let slide_sphere_partition = new Slide(
-	function(DOM_points, DOM_raw, DOM_remesh, DOM_dual, DOM_result){
+	function(DOM_init, DOM_points, DOM_raw, DOM_remesh, DOM_dual, DOM_result){
 		const points_layer = 0;
 		const raw_layer = 1;
 		const remesh_layer = 2;
 		const dual_layer = 3;
+		const skel_layer = 4;
 
+		const context_init = DOM_init.getContext('2d');
 		const context_points = DOM_points.getContext('2d');
 		const context_raw = DOM_raw.getContext('2d');
 		const context_remesh = DOM_remesh.getContext('2d');
@@ -496,6 +619,7 @@ export let slide_sphere_partition = new Slide(
 		this.camera = new THREE.PerspectiveCamera(75, DOM_result.width / DOM_result.height, 0.1, 1000.0);
 		this.camera.position.set(0, 0, 1.8);
 
+		let orbit_controls00  = new OrbitControls(this.camera, DOM_init);
 		let orbit_controls0  = new OrbitControls(this.camera, DOM_points);
 		let orbit_controls1  = new OrbitControls(this.camera, DOM_raw);
 		let orbit_controls2  = new OrbitControls(this.camera, DOM_remesh);
@@ -521,7 +645,7 @@ export let slide_sphere_partition = new Slide(
 		let sphere =  new THREE.Mesh(sphere_geom, sphere_mat);
 		this.group.add(sphere);
 
-		let points = create_branching_point(sphere_graph, points_layer);
+		let points = create_branching_point(sphere_graph, points_layer, skel_layer);
 		this.group.add(points);
 
 		let branching_point_renderer = new Renderer(sphere_graph);
@@ -545,9 +669,15 @@ export let slide_sphere_partition = new Slide(
 				this.time += this.clock.getDelta();
 				this.group.setRotationFromAxisAngle(axis, Math.PI / 60 * this.time);
 
+				this.camera.layers.enable(skel_layer);
+				this.camera.layers.disable(points_layer);
+				main_renderer.setSize(DOM_points.width, DOM_points.height);
+				main_renderer.render(this.scene, this.camera);
+				context_init.clearRect(0, 0, DOM_init.width, DOM_init.height);
+				context_init.drawImage(main_renderer.domElement, 0, 0);
+
 				this.camera.layers.enable(points_layer);
 
-				main_renderer.setSize(DOM_points.width, DOM_points.height);
 				main_renderer.render(this.scene, this.camera);
 				context_points.clearRect(0, 0, DOM_points.width, DOM_points.height);
 				context_points.drawImage(main_renderer.domElement, 0, 0);
@@ -663,10 +793,17 @@ export let slide_partition_results = new Slide(
 
 export let slide_flat_partition = new Slide(
 	function(DOM_3points, DOM_4points, DOM_5points){
-		const base_layer = 0;
-		const points3_layer = 1;
-		const points4_layer = 2;
-		const points5_layer = 3;
+		const base3_layer = 0;
+		const base4_layer = 1;
+		const base5_layer = 2;
+		const sphere3_layer = 3;
+		const sphere4_layer = 4;
+		const sphere5_layer = 5;
+		const points3_layer = 6;
+		const points4_layer = 7;
+		const points5_layer = 8;
+		const base_layer = 9;
+		const sphere_layer = 10;
 
 		const context_points3 = DOM_3points.getContext('2d');
 		const context_points4 = DOM_4points.getContext('2d');
@@ -685,25 +822,43 @@ export let slide_flat_partition = new Slide(
 		pointLight.position.set(10,8,15);
 		this.scene.add(ambiantLight);
 		this.scene.add(pointLight);
-
+		ambiantLight.layers.enable(base3_layer);
+		pointLight.layers.enable(base3_layer);
+		ambiantLight.layers.enable(base4_layer);
+		pointLight.layers.enable(base4_layer);
+		ambiantLight.layers.enable(base5_layer);
+		pointLight.layers.enable(base5_layer);
+		ambiantLight.layers.enable(sphere_layer);
+		pointLight.layers.enable(sphere_layer);
+		ambiantLight.layers.enable(sphere3_layer);
+		pointLight.layers.enable(sphere3_layer);
+		ambiantLight.layers.enable(sphere4_layer);
+		pointLight.layers.enable(sphere4_layer);
+		ambiantLight.layers.enable(sphere5_layer);
+		pointLight.layers.enable(sphere5_layer);
+		ambiantLight.layers.enable(points3_layer);
+		pointLight.layers.enable(points3_layer);
+		ambiantLight.layers.enable(points4_layer);
+		pointLight.layers.enable(points4_layer);		
+		ambiantLight.layers.enable(points5_layer);
+		pointLight.layers.enable(points5_layer);
 		this.group = new THREE.Group;
 		this.scene.add(this.group);
 
 		let sphere =  new THREE.Mesh(sphere_geom, sphere_mat);
-		sphere.layers.set(base_layer);
+		sphere.layers.set(sphere_layer);
 		this.group.add(sphere);
 
 		let flat_3_graph = load_graph('cg', SP.flat_3_cg);
-		let points3 = create_branching_point(flat_3_graph, points3_layer);
+		let points3 = create_branching_point(flat_3_graph, sphere3_layer, base3_layer);
 		this.group.add(points3);
 
-
 		let flat_4_graph = load_graph('cg', SP.flat_4_cg);
-		let points4 = create_branching_point(flat_4_graph, points4_layer);
+		let points4 = create_branching_point(flat_4_graph, sphere4_layer, base4_layer);
 		this.group.add(points4);
 
 		let flat_5_graph = load_graph('cg', SP.flat_5_cg);
-		let points5 = create_branching_point(flat_5_graph, points5_layer);
+		let points5 = create_branching_point(flat_5_graph, sphere5_layer, base5_layer);
 		this.group.add(points5);
 
 		let flat_3_surface = load_cmap2('off', SP.flat_3_off);
@@ -721,35 +876,70 @@ export let slide_flat_partition = new Slide(
 		flat5_surface_renderer.geodesics.create({layer: points5_layer, color: 0xFF2222}).add(this.group);
 		flat5_surface_renderer.vertices.create({size: 0.06125, layer: points5_layer, color: 0xFF2222}).add(this.group);
 
+		let plane = new THREE.Mesh(
+			new THREE.PlaneGeometry(2, 2,1, 1),
+			new THREE.MeshBasicMaterial({color: 0xff00aa, transparent: true, opacity: 0.3, side: THREE.DoubleSide})
+		);
+		plane.layers.set(base_layer);
+		// plane.setRotationFromAxisAngle(new THREE.Vector3(1, 0, 0), Math.PI / 2 * 1.175)
+		plane.position.y +=0.1
+		plane.lookAt(new THREE.Vector3(-0.09312512080324223, 0.9474387681196301, 0.30608412657199213))
+		console.log(plane)
+		this.group.add(plane)
+
 		const axis = new THREE.Vector3(0, 1, 0);
 		this.clock = new Clock(true);
 		this.time = 0;
+		this.show_base = false;
+		this.show_spheres = false;
+		this.show_surfaces = false;
+		this.toggle_base = function(){this.show_base = !this.show_base}
+		this.toggle_spheres = function(){this.toggle_base(); this.show_spheres = !this.show_spheres}
+		this.toggle_surfaces = function(){this.show_surfaces = !this.show_surfaces}
+		
 		this.loop = function(){
 			if(this.running){
 				stats.update();
 				this.time += this.clock.getDelta();
 				this.group.setRotationFromAxisAngle(axis, Math.PI / 60 * this.time);
 
-				this.camera.layers.enable(base_layer);
 
-				this.camera.layers.enable(points3_layer);
+				if(this.show_spheres) this.camera.layers.enable(sphere_layer);
+				if(this.show_base) this.camera.layers.enable(base_layer);
+				
+				this.camera.layers.enable(base3_layer);
+				if(this.show_spheres) this.camera.layers.enable(sphere3_layer);
+				if(this.show_surfaces) this.camera.layers.enable(points3_layer);
 				main_renderer.setSize(DOM_3points.width, DOM_3points.height);
 				main_renderer.render(this.scene, this.camera);
 				context_points3.clearRect(0, 0, DOM_3points.width, DOM_3points.height);
 				context_points3.drawImage(main_renderer.domElement, 0, 0);
 				this.camera.layers.disable(points3_layer);
+				this.camera.layers.disable(base3_layer);
+				this.camera.layers.disable(sphere3_layer);
 
-				this.camera.layers.enable(points4_layer);
+				this.camera.layers.enable(base4_layer);
+				if(this.show_spheres) this.camera.layers.enable(sphere4_layer);
+				if(this.show_surfaces) this.camera.layers.enable(points4_layer);
 				main_renderer.render(this.scene, this.camera);
 				context_points4.clearRect(0, 0, DOM_4points.width, DOM_4points.height);
 				context_points4.drawImage(main_renderer.domElement, 0, 0);
 				this.camera.layers.disable(points4_layer);
+				this.camera.layers.disable(base4_layer);
+				this.camera.layers.disable(sphere4_layer);
 
-				this.camera.layers.enable(points5_layer);
+				this.camera.layers.enable(base5_layer);
+				if(this.show_spheres) this.camera.layers.enable(sphere5_layer);
+				if(this.show_surfaces) this.camera.layers.enable(points5_layer);
 				main_renderer.render(this.scene, this.camera);
 				context_points5.clearRect(0, 0, DOM_5points.width, DOM_5points.height);
 				context_points5.drawImage(main_renderer.domElement, 0, 0);
 				this.camera.layers.disable(points5_layer);
+				this.camera.layers.disable(base5_layer);
+				this.camera.layers.disable(sphere5_layer);
+
+				this.camera.layers.disable(sphere_layer);
+				this.camera.layers.disable(base_layer);
 
 				requestAnimationFrame(this.loop.bind(this));
 			}
@@ -768,6 +958,9 @@ export let slide_ortho_partition = new Slide(
 		const points3_layer = 1;
 		const points4_layer = 2;
 		const points5_layer = 3;
+		const skel3_layer = 4;
+		const skel4_layer = 5;
+		const skel5_layer = 6;
 
 		const context_points3 = DOM_3points.getContext('2d');
 		const context_points4 = DOM_4points.getContext('2d');
@@ -786,7 +979,20 @@ export let slide_ortho_partition = new Slide(
 		pointLight.position.set(10,8,15);
 		this.scene.add(ambiantLight);
 		this.scene.add(pointLight);
-
+		ambiantLight.layers.enable(base_layer);
+		pointLight.layers.enable(base_layer);
+		ambiantLight.layers.enable(points3_layer);
+		pointLight.layers.enable(points3_layer);
+		ambiantLight.layers.enable(points4_layer);
+		pointLight.layers.enable(points4_layer);
+		ambiantLight.layers.enable(points5_layer);
+		pointLight.layers.enable(points5_layer);
+		ambiantLight.layers.enable(skel3_layer);
+		pointLight.layers.enable(skel3_layer);
+		ambiantLight.layers.enable(skel4_layer);
+		pointLight.layers.enable(skel4_layer);
+		ambiantLight.layers.enable(skel5_layer);
+		pointLight.layers.enable(skel5_layer);
 		this.group = new THREE.Group;
 		this.scene.add(this.group);
 
@@ -831,7 +1037,7 @@ export let slide_ortho_partition = new Slide(
 		ortho3_surface_renderer.vertices.create({size: 0.06125, layer: points3_layer, color: 0xFF2222}).add(this.group);
 
 		let ortho_3_graph = load_graph('cg', SP.ortho_3_cg);
-		let points3 = create_branching_point(ortho_3_graph, points3_layer);
+		let points3 = create_branching_point(ortho_3_graph, points3_layer, skel3_layer);
 		this.group.add(points3);
 
 		let ortho_4_surface = load_cmap2('off', SP.ortho_4_off);
@@ -840,7 +1046,7 @@ export let slide_ortho_partition = new Slide(
 		ortho4_surface_renderer.vertices.create({size: 0.06125, layer: points4_layer, color: 0xFF2222}).add(this.group);
 
 		let ortho_4_graph = load_graph('cg', SP.ortho_4_cg);
-		let points4 = create_branching_point(ortho_4_graph, points4_layer);
+		let points4 = create_branching_point(ortho_4_graph, points4_layer,skel4_layer);
 		this.group.add(points4);
 
 		let ortho_5_surface = load_cmap2('off', SP.ortho_5_off);
@@ -849,8 +1055,15 @@ export let slide_ortho_partition = new Slide(
 		ortho5_surface_renderer.vertices.create({size: 0.06125, layer: points5_layer, color: 0xFF2222}).add(this.group);
 
 		let ortho_5_graph = load_graph('cg', SP.ortho_5_cg);
-		let points5 = create_branching_point(ortho_5_graph, points5_layer);
+		let points5 = create_branching_point(ortho_5_graph, points5_layer,skel5_layer );
 		this.group.add(points5);
+
+
+		this.show_base = false;
+		this.show_surfaces = false;
+		this.toggle_base = function(){this.show_base = !this.show_base}
+		this.toggle_surfaces = function(){this.show_surfaces = !this.show_surfaces}
+		
 
 		const axis = new THREE.Vector3(0.3, 0.7, 0).normalize();
 		this.clock = new Clock(true);
@@ -861,26 +1074,33 @@ export let slide_ortho_partition = new Slide(
 				this.time += this.clock.getDelta();
 				this.group.setRotationFromAxisAngle(axis, Math.PI / 60 * this.time);
 
-				this.camera.layers.enable(base_layer);
+				if(this.show_base) this.camera.layers.enable(base_layer);
 
-				this.camera.layers.enable(points3_layer);
+				if(this.show_surfaces) this.camera.layers.enable(points3_layer);
+				this.camera.layers.enable(skel3_layer);
 				main_renderer.setSize(DOM_3points.width, DOM_3points.height);
 				main_renderer.render(this.scene, this.camera);
 				context_points3.clearRect(0, 0, DOM_3points.width, DOM_3points.height);
 				context_points3.drawImage(main_renderer.domElement, 0, 0);
 				this.camera.layers.disable(points3_layer);
+				this.camera.layers.disable(skel3_layer);
 
-				this.camera.layers.enable(points4_layer);
+				if(this.show_surfaces) this.camera.layers.enable(points4_layer);
+				this.camera.layers.enable(skel4_layer);
 				main_renderer.render(this.scene, this.camera);
 				context_points4.clearRect(0, 0, DOM_4points.width, DOM_4points.height);
 				context_points4.drawImage(main_renderer.domElement, 0, 0);
 				this.camera.layers.disable(points4_layer);
+				this.camera.layers.disable(skel4_layer);
 
-				this.camera.layers.enable(points5_layer);
+				if(this.show_surfaces) this.camera.layers.enable(points5_layer);
+				this.camera.layers.enable(skel5_layer);
 				main_renderer.render(this.scene, this.camera);
 				context_points5.clearRect(0, 0, DOM_5points.width, DOM_5points.height);
 				context_points5.drawImage(main_renderer.domElement, 0, 0);
 				this.camera.layers.disable(points5_layer);
+				this.camera.layers.disable(skel5_layer);
+				this.camera.layers.disable(base_layer);
 
 				requestAnimationFrame(this.loop.bind(this));
 			}
@@ -1092,11 +1312,11 @@ export let slide_santa_comparison = new Slide(
 		this.group = new THREE.Group;
 		this.scene.add(this.group);
 
-		this.santa_liv_vol = Display.load_volumes_view("mesh", Santa.santa_liv_mesh);
+		this.santa_liv_vol = Display.load_volumes_view("mesh", Santa.santa_liv_mesh, {min: 0.367, max: 0.965});
 		this.santa_liv_vol.layers.set(livesu_layer);
 		this.group.add(this.santa_liv_vol);
 
-		this.santa_vol = Display.load_volumes_view("mesh", Santa.santa_mesh);
+		this.santa_vol = Display.load_volumes_view("mesh", Santa.santa_mesh, {min: 0.367, max: 0.965});
 		this.santa_vol.layers.set(our_layer);
 		this.group.add(this.santa_vol);
 
@@ -1145,7 +1365,7 @@ export let slide_fertility_result = new Slide(
 		const context_fertility = DOM_fertility.getContext('2d');
 
 		this.camera = new THREE.PerspectiveCamera(75, DOM_fertility.width / DOM_fertility.height, 0.1, 1000.0);
-		this.camera.position.set(0, 0, 0.6);
+		this.camera.position.set(0, 0, 1);
 
 		const orbit_controls0  = new OrbitControls(this.camera, DOM_fertility);
 
@@ -1161,26 +1381,27 @@ export let slide_fertility_result = new Slide(
 		this.group = new THREE.Group;
 		this.scene.add(this.group);
 
-		this.fertility_surface = Display.load_surface_view("off", Fertility.fertility_off, {color: 0xffffff, side: THREE.BackSide, transparent: true, opacity: 0.3});
-		this.fertility_surface.layers.set(base_layer);
-		this.group.add(this.fertility_surface);
+		this.vessels_surface = Display.load_surface_view("off", Vessels.vessels_off, {transparent: true, opacity: 0.3});
+		this.vessels_surface.layers.set(base_layer);
+		this.group.add(this.vessels_surface);
 
-		this.fertility_vol = Display.load_volumes_view("mesh", Fertility.fertility_mesh);
-		this.fertility_vol.layers.set(base_layer);
-		this.group.add(this.fertility_vol);
+		this.vessels_vol = Display.load_volumes_view("mesh", Vessels.vessels_mesh);
+		this.vessels_vol.layers.set(base_layer);
+		this.group.add(this.vessels_vol);
+
 
 		const axis = new THREE.Vector3(0, 1, 0).normalize();
 		this.clock = new Clock(true);
 		this.time = 0;
 
 		this.toggle_clipping = function(){
-			this.fertility_vol.material.uniforms.clipping.value = 1 - this.fertility_vol.material.uniforms.clipping.value;
+			this.vessels_vol.material.uniforms.clipping.value = 1 - this.vessels_vol.material.uniforms.clipping.value;
 
 		}
 
 		this.clipping = false;
 		this.toggle_material = function(){
-				this.fertility_vol.material.uniforms.quality.value = 1 - this.fertility_vol.material.uniforms.quality.value;
+				this.vessels_vol.material.uniforms.quality.value = 1 - this.vessels_vol.material.uniforms.quality.value;
 
 		};
 		this.loop = function(){
