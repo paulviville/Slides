@@ -75,7 +75,7 @@
 					<div class="r-hstack">
 						<div>
 							<img src="Images/Utils/hexmesh.PNG" height="300px" >
-							<p style="font-size:20px; margin-top: 0px;"><a hreflang="https://www.hexalab.net/">Hexalab</a></p>
+							<p style="font-size:20px; margin-top: 0px;"><a href="https://www.hexalab.net/">Hexalab</a></p>
 						</div>
 						<ul style="font-size: 25px;">
 							<li style="padding-top: 14px;">Highly Sought After</li>
@@ -151,22 +151,28 @@
 					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
 					<div class="r-hstack">
 						<div style="padding-right:2%;">  
-							<canvas  id="Pipeline00_surface" width="220" height="360"></canvas>
-							<p style="font-size: 30px;">Input<br>Surface</p>
+							<canvas  id="Pipeline00_surface" width="200" height="330"></canvas>
+							<p style="font-size: 25;">Input<br>Surface</p>
 						</div>
 						<div class="fragment" style="padding-right:2%">  
-							<canvas id="Pipeline00_skel" width="220" height="360"></canvas>
-							<p style="font-size: 30px;">Processed<br>Skeleton</p>
+							<canvas id="Pipeline00_skel" width="200" height="330"></canvas>
+							<p style="font-size: 25;">Processed<br>Skeleton</p>
 						</div>
 						<div class="fragment">  
-							<canvas id="Pipeline00_scaffold" width="220" height="360"></canvas>
-							<p style="font-size: 30px;">Skeleton<br>Scaffold</p>
+							<canvas id="Pipeline00_scaffold" width="200" height="330"></canvas>
+							<p style="font-size: 25;">Skeleton<br>Scaffold</p>
 						</div>
 						<div class="fragment" style="padding-right:2%">  
-							<canvas id="Pipeline00_mesh" width="220" height="360"></canvas>
-							<p style="font-size: 30px;">Output<br>Mesh</p>
+							<canvas id="Pipeline00_mesh" width="200" height="330"></canvas>
+							<p style="font-size: 25;">Output<br>Mesh</p>
 						</div>
 					</div>
+
+					<div class="r-hstack">
+						<p style="font-size:20px; margin-top: 0px; padding-right: 5%;"><a href="http://pers.ge.imati.cnr.it/livesu/papers/LMPS16/LMPS16.pdf">(Livesu, CGF 2016)</a></p>
+						<p style="font-size:20px; margin-top: 0px;"><a href="https://link.springer.com/chapter/10.1007/978-3-319-77066-6_2">(Panatopoulou, Springer 2018)</a></p>
+					</div>
+
 					<aside class="notes">
 						One of the main challenges in generating a hexahedral mesh of a tubular geometry such as this cactus is handling the branching
 						points, and a second one is to obtain a properly structured mesh aligned with the border of the domain.🖱️
@@ -185,12 +191,17 @@
 					Connection Surfaces
 					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
 					<img src="Images/Path_Co/spheres.png" height="300px">
+					<div class="r-hstack" style="margin-top: 0px;">
+						<p style="font-size:25px; margin-top: 0px; padding-right: 20%;"> degree 1: <br/>Extremity</p>
+						<p style="font-size:25px; margin-top: 0px; padding-right: 20%;">degree 2: <br/>Joint</p>
+						<p style="font-size:25px; margin-top: 0px;">degree > 2: <br/>Branching Point</p>
+					</div>
 					<!-- <p style="font-size:30px; margin-top: 0px;">Quad Scaffolding Based on Vertex Degree</p> -->
 					<aside class="notes">
 						The connection surfaces are built localy on each vertex, depending on it's degree, without any need for a larger context.
 						<br /><br />
 						You can see here how we handle a vertex of degree 1, an extremity, with a single quad. A vertex of degree 2,
-						a joint, with a sphere partitioned in 2 quads, and a vertex of degree 4, a complex branching point.
+						a joint, with a sphere partitioned in 2 quads, and a vertex of degree 4, a complex branching point, with a sphere partitioned into 4 quads.
 						For joints and extremities, the vertices of the connection surfaces are set on the plane
 						orthogonal to the branch's tangent. The geometry is propagated from the more constrained complex branching points through 
 						rotation minimizing frames. 🖱️
@@ -206,8 +217,8 @@
 						On each edge of the skeleton, a chunk composed of 4 hexahedra is added.
 						It is then linked to the corresponding quads of incident vertices' connection surfaces.
 						<br /><br />
-						Having a chunk made of 4 hex associated to the quads of the connection surfaces will
-						allow us to handle any branching point generically. 🖱️
+						The different methods we propose to build our connection surfaces around the vertices of the skeleton are all compatible
+						with the simple interface presented by both ends of the chunk 🖱️
 					</aside>
 				</section>
 
@@ -458,13 +469,15 @@
 							<p style="font-size: 30px;">Reprocessed<br>Skeleton</p>
 						</div>
 					</div>
+					
+					<p style="font-size:20px; margin-top: 0px;"><a href="https://projet.liris.cnrs.fr/imagine/pub/proceedings/SGP-2012/pdf/v31i5pp1735-1744.pdf">(Tagliasacchi, ESGP 2012)</a></p>
 					<aside class="notes">
 						I will now described in broad strokes the whole pipeline from surface to 
 						final hexahedral mesh.
 						<br /><br />
 						As stated initially, the input required is a surface mesh. 🖱️
 						<br /><br />
-						From this surface mesh a skeleton curve is extracted. 🖱️
+						From this surface mesh a skeleton curve is extracted. Here using the Mean Curvature Flow method 🖱️
 						<br /><br />
 						The skeleton is reprocessed to fit our needs.
 						Alternatively, the whole process can start from the third step using a processed skeleton 
@@ -492,7 +505,7 @@
 					<aside class="notes">
 						From the skeleton, the contact surfaces can be built to set a scaffold for the initial hex mesh. 🖱️
 						<br /><br />
-						From the scaffold, the initial mesh can be built by adding a chunk of 4 hexes to each edge. 🖱️
+						From the scaffold, the initial mesh can be built by adding a chunk of 4 hexes to each edge and connecting them together. 🖱️
 						<br /><br />
 						Subsequently, the outer vertices of the mesh can be projected to the surface. 🖱️
 						<br /><br />
@@ -518,6 +531,8 @@
 							<p style="font-size: 30px;">Optimized<br>Mesh</p>
 						</div>
 					</div>
+					<p style="font-size:20px; margin-top: 0px;"><a href="http://www.cs.ubc.ca/labs/imager/tr/2015/untangler/">(Livesu, SIGGRAPH 2015)</a></p>
+
 					<div class="fragment" id="Pipeline2_material"></div>
 					<aside class="notes">
 						An optional but very useful step can be applied to the mesh:
@@ -528,7 +543,7 @@
 						The mesh can then be subdivided 🖱️
 						<br /><br />
 						And then be optimized 🖱️ 
-						The method used here to optimize the mesh is Edge-Cone Rectification, using the common quality mertric:
+						The method used here to optimize the mesh is Edge-Cone Rectification, and we are using the common quality metric:
 						Scaled Jacobians to evaluate the quality. Scaled jacobians give an indication of the level of deformation
 						of an hexahedron compared to a cuboid, values range from -1 to 1, the higher the better and negative values make the mesh unusable for simulation.
 						The important values being the worst and average values.
@@ -612,12 +627,12 @@
 					<aside class="notes">
 						We applied our method to a variety of different meshes with various features.
 						<br /><br />
-						Here you can see it applied to the dinopet. As you can see, aside from the the beak, and the tip of the tail, the fitting
-						is pretty good.
-						The tip of the tale could probably be fixed with a small modificiation by hand to the skeleton.
+						Here you can see it applied to the dinopet. As you can see, the fitting
+						is pretty good for a low resolution mesh.
 						🖱️
 						<br/><br/>
-						🖱️ as you can see, most elements have a good quality, 🖱️ with the worst elements being incident to the branching points.
+						🖱️ as you can see, most elements have a good quality overall along the branches, 🖱️ with the worst elements being incident to the branching points as is expected.
+						And the hexahedral mesh is well aligned with the borders of the geometry
 						🖱️
 					</aside>
 				</section>
@@ -627,8 +642,8 @@
 					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
 					<div style="padding-right:2%">  
 						<canvas id="Result_Horse" width="500" height="400" ></canvas>
-						<p style="font-size:20px; margin-top: 0px;">Scaled Jacobian:<br>min:0.449 - avg:0.912</p>
 						<div>Horse</div>
+						<p style="font-size:20px; margin-top: 0px;">Scaled Jacobian:<br>min:0.449 - avg:0.912</p>
 					</div>
 					<div class="fragment" id="Results_Horse_material"></div>
 					<div class="fragment" id="Results_Horse_Clipping"></div>
@@ -640,6 +655,7 @@
 						<br/>
 						🖱️
 						<br/>
+						the repartition of lower and better quality elements is the same once again.
 						🖱️
 					</aside>
 				</section>
@@ -649,8 +665,8 @@
 					<hr style="width: 70%; display:flex; justify-content:space-evenly;">
 					<div style="padding-right:2%">  
 						<canvas id="Result_Cycles" width="500" height="400" ></canvas>
-						<p style="font-size:20px; margin-top: 0px;">Scaled Jacobian:<br>min:0.316 - avg:0.937</p>
 						<div>Cycles</div>
+						<p style="font-size:20px; margin-top: 0px;">Scaled Jacobian:<br>min:0.316 - avg:0.937</p>
 					</div>
 					<div class="fragment" id="Results_Cycles_material"></div>
 					<div class="fragment" id="Results_Cycles_Clipping"></div>
@@ -807,7 +823,7 @@
 					<div class="r-vstack">
 						<div>
 							<ul style="font-size: 25px;">
-								<li>Thanks to <a hreflang="https://www.sciencedirect.com/science/article/abs/pii/S0010448518304238">(Bracci, CAD 2019)</a> for <a hreflang="https://www.hexalab.net/">Hexalab</a></li>
+								<li>Thanks to <a href="https://www.sciencedirect.com/science/article/abs/pii/S0010448518304238">(Bracci, CAD 2019)</a> for <a href="https://www.hexalab.net/">Hexalab</a></li>
 							</ul>
 						</div>
 						<div>

@@ -1383,6 +1383,10 @@ export let slide_fertility_result = new Slide(
 
 		this.vessels_surface = Display.load_surface_view("off", Vessels.vessels_off, {transparent: true, opacity: 0.3});
 		this.vessels_surface.layers.set(base_layer);
+		// this.group.add(new THREE.AxesHelper())
+		this.vessels_surface.position.y += 0.0025
+		this.vessels_surface.position.x += 0.0025
+		this.vessels_surface.position.z += 0.00125
 		this.group.add(this.vessels_surface);
 
 		this.vessels_vol = Display.load_volumes_view("mesh", Vessels.vessels_mesh);
