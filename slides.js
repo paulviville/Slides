@@ -21,6 +21,7 @@ import {BoundingBox} from './CMapJS/Utils/BoundingBox.js';
 import compute_scaled_jacobian from './CMapJS/Modeling/Quality/Scaled_Jacobians.js';
 import {Clock} from './CMapJS/Dependencies/three.module.js';
 import * as SP from './Files/sphere_partition_files.js';
+import {lung_mesh} from './Files/lung_files.js';
 
 import Stats from './CMapJS/Dependencies/stats.module.js'
 import * as Display from './display_only.js';
@@ -28,7 +29,6 @@ import * as Display from './display_only.js';
 let v0 = new THREE.Vector3(-0.5691713960140607, -0.1791835876340561, 0.8024569545352532)
 let v1 = new THREE.Vector3(0.9343240420699345, 0.1814724321001853, 0.30676756803440447)
 let v2 = new THREE.Vector3(-0.12054584413588124 ,0.41561552883270425 ,-0.9015167395310413)
-
 let n = new THREE.Vector3()
 n.crossVectors(v0, v1).normalize();
 n.add(v1.clone().cross(v2).normalize());
@@ -52,9 +52,9 @@ let mesh_edge_material = new THREE.LineBasicMaterial({
 let ambiant_light_int = 0.4;
 let point_light_int = 0.6;
 
-let vessels_surface = load_graph("cg", Mech_piece.mech_piece_cg);
-let bb = BoundingBox(vessels_surface.get_attribute(vessels_surface.vertex, "position"))
-console.log(bb)
+// let vessels_surface = load_cmap3("mesh", lung_mesh);
+// let bb = BoundingBox(vessels_surface.get_attribute(vessels_surface.vertex, "position"))
+// console.log(bb)
 
 let stats = new Stats();
 // document.body.appendChild(stats.dom);
@@ -167,6 +167,7 @@ export let slide_overview = new Slide(
 		this.vessels_skel = new Renderer(vessels_skel);
 		this.vessels_skel.edges.create({layer: skeleton_layer, material: mesh_edge_material}).add(this.group);
 
+		// this.vessels_vol = Display.load_volumes_view("mesh", lung_mesh);
 		this.vessels_vol = Display.load_volumes_view("mesh", Vessels.vessels_mesh);
 		this.vessels_vol.layers.set(output_layer);
 		this.group.add(this.vessels_vol);
@@ -1615,6 +1616,69 @@ export let slide_cycles_result = new Slide(
 				main_renderer.render(this.scene, this.camera);
 				context_cycles.clearRect(0, 0, DOM_cycles.width, DOM_cycles.height);
 				context_cycles.drawImage(main_renderer.domElement, 0, 0);
+				this.camera.layers.disable(base_layer);
+
+				requestAnimationFrame(this.loop.bind(this));
+			}
+		}
+	}
+);
+
+export let slide_lung_result = new Slide(
+	function(DOM_lung){
+		const base_layer = 0;
+
+		const context_lung = DOM_lung.getContext('2d');
+
+		this.camera = new THREE.PerspectiveCamera(75, DOM_lung.width / DOM_lung.height, 0.1, 1000.0);
+		this.camera.position.set(0, 0, 6);
+
+		const orbit_controls0  = new OrbitControls(this.camera, DOM_lung);
+
+		this.scene = new THREE.Scene();
+		let ambiantLight = new THREE.AmbientLight(0xFFFFFF, ambiant_light_int);
+		let pointLight = new THREE.PointLight(0xFFFFFF, point_light_int);
+		pointLight.position.set(10,8,15);
+		ambiantLight.layers.enable(base_layer);
+		pointLight.layers.enable(base_layer);
+		this.scene.add(ambiantLight);
+		this.scene.add(pointLight);
+
+		this.group = new THREE.Group;
+		this.scene.add(this.group);
+		// this.group.add(new THREE.AxisHelper())
+		this.lung_vol = Display.load_volumes_view("mesh", lung_mesh, {axis: (new THREE.Vector3(0, 0, 1))});
+		// this.lung_vol.scale.set(0.4, 0.4, 0.4);
+		// this.lung_vol.setRotationFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI / 2);
+		// this.lung_vol.applyAxisAngle(new THREE.Vector3(0, 0, 1), Math.PI / 2);
+		this.lung_vol.layers.set(base_layer);
+		this.group.add(this.lung_vol);
+
+		const axis = new THREE.Vector3(0, 1, 0).normalize();
+		this.clock = new Clock(true);
+		this.time = 0;
+
+		this.toggle_clipping = function(){
+			this.lung_vol.material.uniforms.clipping.value = 1 - this.lung_vol.material.uniforms.clipping.value;
+		}
+
+		this.clipping = false;
+		this.toggle_material = function(){
+			this.lung_vol.material.uniforms.quality.value = 1 - this.lung_vol.material.uniforms.quality.value;
+		};
+		this.toggle_material();
+		this.loop = function(){
+			if(this.running){
+				stats.update();
+
+				this.time += this.clock.getDelta();
+				this.group.setRotationFromAxisAngle(axis,  Math.PI / 3 + Math.PI / 90 * this.time);
+
+				this.camera.layers.enable(base_layer);
+				main_renderer.setSize(DOM_lung.width, DOM_lung.height);
+				main_renderer.render(this.scene, this.camera);
+				context_lung.clearRect(0, 0, DOM_lung.width, DOM_lung.height);
+				context_lung.drawImage(main_renderer.domElement, 0, 0);
 				this.camera.layers.disable(base_layer);
 
 				requestAnimationFrame(this.loop.bind(this));

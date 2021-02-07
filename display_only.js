@@ -116,6 +116,7 @@ export function load_volumes_view(format, file_str, params = {}){
 	];
 	let center = new THREE.Vector3;
 
+
 	const hex_qualities = [];
 	let min_quality = Infinity;
 	let max_quality = -Infinity;
@@ -124,7 +125,9 @@ export function load_volumes_view(format, file_str, params = {}){
 	g.hex.forEach(hex => {
 		center.set(0, 0, 0);
 		for(let i = 0; i < 8; ++i){
-			P[i].fromArray(g.v[hex[i]]);
+			P[i].fromArray(g.v[hex[i]])
+			if(params.axis)
+				P[i].applyAxisAngle(params.axis, Math.PI/2);
 			center.add(P[i]);
 		}
 		center.divideScalar(8);
